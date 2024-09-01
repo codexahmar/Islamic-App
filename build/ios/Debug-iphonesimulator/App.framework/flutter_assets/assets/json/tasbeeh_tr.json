@@ -1,0 +1,63 @@
+[
+    {
+      "name": "SubhanAllah",
+      "arabic": "سبحان الله",
+      "translation": "Allah yücedir",
+      "count": 33
+    },
+    {
+      "name": "Alhamdulillah",
+      "arabic": "الحمد لله",
+      "translation": "Hamd Allah’a mahsustur",
+      "count": 33
+    },
+    {
+      "name": "Allahu Akbar",
+      "arabic": "الله أكبر",
+      "translation": "Allah en büyüktür",
+      "count": 34
+    },
+    {
+      "name": "La ilaha illallah",
+      "arabic": "لا إله إلا الله",
+      "translation": "Allah’tan başka ilah yoktur",
+      "count": 100
+    },
+    {
+      "name": "Astaghfirullah",
+      "arabic": "أستغفر الله",
+      "translation": "Allah’tan af diliyorum",
+      "count": 100
+    },
+    {
+      "name": "Bismillah",
+      "arabic": "بسم الله",
+      "translation": "Allah’ın adıyla",
+      "count": 1
+    },
+    {
+      "name": "Hasbunallahu wa ni'mal wakeel",
+      "arabic": "حسبي الله ونعم الوكيل",
+      "translation": "Allah bize yeter, O ne güzel vekildir",
+      "count": 7
+    },
+    {
+      "name": "Rabbana atina fid dunya hasanatan wa fil akhirati hasanatan waqina azab an-nar",
+      "arabic": "ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار",
+      "translation": "Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver ve bizi ateşin azabından koru",
+      "count": 1
+    },
+    {
+      "name": "SubhanAllahi wa bihamdiHi SubhanAllahil Azim",
+      "arabic": "سبحان الله وبحمده سبحان الله العظيم",
+      "translation": "Allah’ı överek tesbih ederim, Allah en büyük olandır",
+      "count": 3
+    },
+    {
+      "name": "La hawla wa la quwwata illa billah",
+      "arabic": "لا حول ولاقوة إلا بالله",
+      "translation": "Allah’tan başka güç ve kuvvet yoktur",
+      "count": 10
+    }
+  ]
+  

@@ -1,0 +1,4 @@
+<resources>
+    <string name="appwidget_description">Description of the App Widget</string>
+    <string name="widget_description">Description of Widget Image</string>
+</resources>

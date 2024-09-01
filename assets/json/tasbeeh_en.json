@@ -1,0 +1,62 @@
+[
+  {
+    "name": "SubhanAllah",
+    "arabic": "سبحان الله",
+    "translation": "Glory be to Allah",
+    "count": 33
+  },
+  {
+    "name": "Alhamdulillah",
+    "arabic": "الحمد لله",
+    "translation": "Praise be to Allah",
+    "count": 33
+  },
+  {
+    "name": "Allahu Akbar",
+    "arabic": "الله أكبر",
+    "translation": "Allah is the Greatest",
+    "count": 34
+  },
+  {
+    "name": "La ilaha illallah",
+    "arabic": "لا إله إلا الله",
+    "translation": "There is no deity but Allah",
+    "count": 100
+  },
+  {
+    "name": "Astaghfirullah",
+    "arabic": "أستغفر الله",
+    "translation": "I seek forgiveness from Allah",
+    "count": 100
+  },
+  {
+    "name": "Bismillah",
+    "arabic": "بسم الله",
+    "translation": "In the name of Allah",
+    "count": 1
+  },
+  {
+    "name": "Hasbunallahu wa ni'mal wakeel",
+    "arabic": "حسبي الله ونعم الوكيل",
+    "translation": "Allah is Sufficient for us, and He is the Best Disposer of affairs",
+    "count": 7
+  },
+  {
+    "name": "Rabbana atina fid dunya hasanatan wa fil akhirati hasanatan waqina azab an-nar",
+    "arabic": "ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار",
+    "translation": "Our Lord, give us good in this world and good in the Hereafter and protect us from the punishment of the Fire",
+    "count": 1
+  },
+  {
+    "name": "SubhanAllahi wa bihamdiHi SubhanAllahil Azim",
+    "arabic": "سبحان الله وبحمده سبحان الله العظيم",
+    "translation": "Glory be to Allah and praise Him, Glory be to Allah the Most Great",
+    "count": 3
+  },
+  {
+    "name": "La hawla wa la quwwata illa billah",
+    "arabic": "لا حول ولاقوة إلا بالله",
+    "translation": "There is no power nor strength except with Allah",
+    "count": 10
+  }
+]
