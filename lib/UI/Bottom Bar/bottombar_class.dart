@@ -8,6 +8,7 @@ import 'BottomBar Screens/HomeScreen/home_screen.dart';
 import 'BottomBar Screens/QiblaScreen/qibla_screen.dart';
 import 'BottomBar Screens/SettingsScreen/settings_screen.dart';
 
+
 class BottomNavbar extends StatefulWidget {
   const BottomNavbar({super.key});
 

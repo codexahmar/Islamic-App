@@ -85,20 +85,6 @@ class PremiumUpgradeCard extends StatelessWidget {
                                   color: Colors.white,
                                 ),
                               ),
-                              SizedBox(width: padding),
-                              Icon(
-                                Icons.circle,
-                                size: dotSize, // Smaller dot size
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: padding / 2),
-                              Text(
-                                localizations.betterUXExperience,
-                                style: TextStyle(
-                                  fontSize: smallFontSize,
-                                  color: Colors.white,
-                                ),
-                              ),
                             ],
                           ),
                         ],

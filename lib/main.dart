@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'Utils/prayer_times_manager.dart';
 import 'generated/l10n.dart';
 import 'UI/Screens/splash_screen.dart';
 import 'providers/location_provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+
+  tz.initializeTimeZones();
 
   final prefs = await SharedPreferences.getInstance();
   final String? languageCode = prefs.getString('languageCode');
+
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
 
   runApp(MyApp(
     initialLocale:

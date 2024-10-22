@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:quran/quran.dart' as quran;
 
-import '../../generated/l10n.dart';
+import 'package:quran_app/UI/Screens/juzz_details.dart';
 
 class JuzzListScreen extends StatefulWidget {
   const JuzzListScreen({super.key});
@@ -13,6 +13,10 @@ class JuzzListScreen extends StatefulWidget {
 
 class _JuzzListScreenState extends State<JuzzListScreen> {
   List<Map<String, dynamic>> juzzDetails = [];
+
+  final Color primaryColor = Color(0xFF0E7C7B); // Updated primary color
+  final Color accentColor = Color(0xFFF4A261); // New accent color (orange)
+  final Color backgroundColor = Color(0xFFF5F5F5); // Light grey background
 
   @override
   void initState() {
@@ -32,79 +36,101 @@ class _JuzzListScreenState extends State<JuzzListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localization = S.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          localization.appBarTitle,
-          style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w500),
-        ),
-        centerTitle: true,
         elevation: 0,
+        title: Text('Juz List',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: primaryColor,
       ),
-      body: ListView.builder(
-        itemCount: juzzDetails.length,
-        padding: const EdgeInsets.all(12.0),
-        itemBuilder: (context, index) {
-          int juzNumber = juzzDetails[index]['juzNumber'];
-          Map<int, List<int>> surahAndVerses =
-              juzzDetails[index]['surahAndVerses'];
-          String surahDetails = surahAndVerses.entries.map((entry) {
-            String surahName = quran.getSurahName(entry.key);
-            String verses = entry.value.join(', ');
-            return "$surahName: Ayahs $verses";
-          }).join("\n");
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [primaryColor.withOpacity(0.1), backgroundColor],
+          ),
+        ),
+        child: ListView.builder(
+          itemCount: juzzDetails.length,
+          padding: const EdgeInsets.all(16.0),
+          itemBuilder: (context, index) {
+            int juzNumber = juzzDetails[index]['juzNumber'];
+            Map<int, List<int>> surahAndVerses =
+                juzzDetails[index]['surahAndVerses'];
+            String surahDetails = surahAndVerses.entries.map((entry) {
+              String surahName = quran.getSurahName(entry.key);
+              String verses = entry.value.join(', ');
+              return "$surahName: Ayahs $verses";
+            }).join("\n");
 
-          return Card(
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(16.0),
-              leading: CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.grey[200],
-                child: Text(
-                  "$juzNumber",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+            return Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              margin: const EdgeInsets.symmetric(vertical: 10.0),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(15),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          JuzDetailScreen(juzNumber: juzNumber),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 28,
+                            backgroundColor: primaryColor,
+                            child: Text(
+                              "$juzNumber",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Text(
+                            "Juz $juzNumber",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        surahDetails,
+                        style: TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              title: Text(
-                "Juz $juzNumber",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black, // Title text color
-                ),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  surahDetails,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.5,
-                    color: Colors.black87, // Subtitle text color
-                  ),
-                ),
-              ),
-              onTap: () {
-                // Navigate to the detailed view of the selected Juz, if required.
-              },
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

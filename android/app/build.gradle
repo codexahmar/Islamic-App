@@ -4,6 +4,8 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def workVersion = "2.8.1"
+
 android {
     namespace = "com.example.quran_app"
     compileSdk = 34
@@ -15,7 +17,7 @@ android {
     }
 
     kotlinOptions {
-      jvmTarget = "1.8"
+        jvmTarget = "1.8"
     }
 
     defaultConfig {
@@ -36,6 +38,11 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+}
+
+dependencies {
+    implementation "androidx.work:work-runtime:$workVersion"
+    implementation "androidx.work:work-runtime-ktx:$workVersion"
 }
 
 flutter {

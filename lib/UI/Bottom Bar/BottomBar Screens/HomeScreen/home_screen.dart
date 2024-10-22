@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_app/UI/Screens/prayer_screen.dart';
 import 'package:quran_app/generated/l10n.dart';
-import 'package:quran_app/Utils/location_util.dart'; // Import the utility
+import 'package:quran_app/Utils/location_util.dart';
 
 import '../../../../Utils/prayer_times_manager.dart';
 import '../../../Screens/40_rabana.dart';
@@ -33,23 +36,32 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late List<Map<String, dynamic>> featureItems;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      // Check for location permission and fetch prayer times
-      if (await LocationUtil.checkLocationPermission()) {
-        Provider.of<PrayerTimeManager>(context, listen: false)
-            .fetchPrayerTimes(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Location permission is required for this feature.'),
-          ),
-        );
-      }
+    _initializeData();
+    loadAd();
+  }
+
+  Future<void> _initializeData() async {
+    await _fetchPrayerTimes();
+    setState(() {
+      _isInitialized = true;
     });
+  }
+
+  Future<void> _fetchPrayerTimes() async {
+    if (await LocationUtil.checkLocationPermission()) {
+      await Provider.of<PrayerTimeManager>(context, listen: false)
+          .fetchPrayerTimes(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Location permission is required for this feature.')),
+      );
+    }
   }
 
   @override
@@ -109,113 +121,231 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
+  BannerAd? _bannerAd;
+  bool _isLoaded = false;
+
+  // TODO: replace this test ad unit with your own ad unit.
+  final adUnitId = Platform.isAndroid
+      ? 'ca-app-pub-3940256099942544/6300978111'
+      : 'ca-app-pub-3940256099942544/2934735716';
+
+  /// Loads a banner ad.
+  void loadAd() {
+    _bannerAd = BannerAd(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          debugPrint('$ad loaded.');
+          setState(() {
+            _isLoaded = true;
+          });
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('BannerAd failed to load: $err');
+          // Dispose the ad here to free resources.
+          ad.dispose();
+        },
+      ),
+    )..load();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final prayerTimeManager = Provider.of<PrayerTimeManager>(context);
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        title: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Text(
-            S.of(context).appTitle,
-            style:
-                GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w700),
+    return WillPopScope(
+      onWillPop: () async {
+        // Show confirmation dialog
+        final shouldClose = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: Colors.white, // Background color
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0), // Rounded corners
+            ),
+            title: Text(
+              'Confirm Exit',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black, // Title color
+              ),
+            ),
+            content: Padding(
+              padding: const EdgeInsets.symmetric(
+                  vertical: 10.0), // Padding for content
+              child: Text(
+                'Are you sure you want to close the app?',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54, // Content color
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false), // No
+                child: Text(
+                  'No',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w600, // Button text style
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true), // Yes
+                child: Text(
+                  'Yes',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600, // Button text style
+                  ),
+                ),
+              ),
+            ],
           ),
+        );
+        return shouldClose ?? false; // Close the app if user confirms
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          centerTitle: false,
+          title: Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(
+              S.of(context).appTitle,
+              style: GoogleFonts.poppins(
+                  fontSize: 24, fontWeight: FontWeight.w700),
+            ),
+          ),
+          actions: [
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: LocationWidget(),
+            ),
+          ],
         ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: LocationWidget(),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 20),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PrayerInfoWidget(
-                prayerName: prayerTimeManager.prayerName,
-                prayerTime: prayerTimeManager.prayerTime,
-                nextPrayer: prayerTimeManager.nextPrayer,
-              ),
-              SizedBox(height: 15),
-              AlQuranWidget(),
-              SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconContainerWidget(
-                    imagePath: "assets/images/surah_icon.png",
-                    label: S.of(context).surah,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SurahListScreen(),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PrayerInfoWidget(
+                  prayerName: prayerTimeManager.prayerName,
+                  prayerTime: prayerTimeManager.prayerTime,
+                  nextPrayer: prayerTimeManager.nextPrayer,
+                ),
+                SizedBox(height: 15),
+                (_isLoaded)
+                    ? Align(
+                        alignment: Alignment.bottomCenter,
+                        child: SafeArea(
+                          child: SizedBox(
+                            width: _bannerAd!.size.width.toDouble(),
+                            height: _bannerAd!.size.height.toDouble(),
+                            child: AdWidget(ad: _bannerAd!),
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                  IconContainerWidget(
-                    imagePath: "assets/images/juzz_icon.png",
-                    label: S.of(context).juzz,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => JuzzListScreen(),
+                      )
+                    : SizedBox(),
+                SizedBox(height: 15),
+                AlQuranWidget(),
+                SizedBox(height: 15),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SurahListScreen(),
+                            ),
+                          );
+                        },
+                        child: IconContainerWidget(
+                          imagePath: "assets/images/surah_icon.png",
+                          label: S.of(context).surah,
                         ),
-                      );
-                    },
-                  ),
-                  IconContainerWidget(
-                    imagePath: "assets/images/mp3_icon.png",
-                    label: S.of(context).mp3,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Mp3Screen(),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => JuzzListScreen(),
+                            ),
+                          );
+                        },
+                        child: IconContainerWidget(
+                          imagePath: "assets/images/juzz_icon.png",
+                          label: S.of(context).juzz,
                         ),
-                      );
-                    },
-                  ),
-                  IconContainerWidget(
-                    imagePath: "assets/images/bookmark_icon.png",
-                    label: S.of(context).bookmark,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BookmarkScreen(),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Mp3Screen(),
+                            ),
+                          );
+                        },
+                        child: IconContainerWidget(
+                          imagePath: "assets/images/mp3_icon.png",
+                          label: S.of(context).mp3,
                         ),
-                      );
-                    },
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookmarkScreen(),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(3.0),
+                          child: IconContainerWidget(
+                            imagePath: "assets/images/bookmark_icon.png",
+                            label: S.of(context).bookmark,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Text(
-                S.of(context).moreFeatures,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-              SizedBox(height: 12),
-              GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: featureItems.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10),
-                itemBuilder: (context, index) {
-                  return FeatureItemWidget(
-                      imagePath: featureItems[index]["imagePath"]!,
-                      label: featureItems[index]["label"]!,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  S.of(context).moreFeatures,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(height: 12),
+                GridView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: featureItems.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 5,
+                      mainAxisSpacing: 10),
+                  itemBuilder: (context, index) {
+                    return InkWell(
                       onTap: () {
                         Navigator.push(
                           context,
@@ -225,13 +355,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      color: featureItems[index]["color"]);
-                },
-              ),
-              SizedBox(
-                height: 5,
-              )
-            ],
+                      child: FeatureItemWidget(
+                          imagePath: featureItems[index]["imagePath"]!,
+                          label: featureItems[index]["label"]!,
+                          color: featureItems[index]["color"]),
+                    );
+                  },
+                ),
+                SizedBox(
+                  height: 5,
+                )
+              ],
+            ),
           ),
         ),
       ),

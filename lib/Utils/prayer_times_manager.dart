@@ -17,29 +17,31 @@ class PrayerTimeManager extends ChangeNotifier {
   String get prayerTime => _prayerTime;
   String get nextPrayer => _nextPrayer;
 
-  Future<void> fetchPrayerTimes(BuildContext context) async {
+  Future<void> fetchPrayerTimes([BuildContext? context]) async {
     final service = PrayerTimesService();
     try {
       final fetchedTimings = await service.getPrayerTimes();
-      final l10n = S.of(context);
 
       _timings = fetchedTimings;
 
-      final localizedPrayerNames = {
-        'Fajr': l10n.fajr,
-        'Sunrise': l10n.sunrise,
-        'Dhuhr': l10n.dhuhr,
-        'Asr': l10n.asr,
-        'Maghrib': l10n.maghrib,
-        'Isha': l10n.isha,
-      };
+      if (context != null) {
+        final l10n = S.of(context);
+        final localizedPrayerNames = {
+          'Fajr': l10n.fajr,
+          'Sunrise': l10n.sunrise,
+          'Dhuhr': l10n.dhuhr,
+          'Asr': l10n.asr,
+          'Maghrib': l10n.maghrib,
+          'Isha': l10n.isha,
+        };
 
-      final prayerTimes = PrayerTimeCalculator.calculateNextPrayerTime(
-          _timings, localizedPrayerNames);
+        final prayerTimes = PrayerTimeCalculator.calculateNextPrayerTime(
+            _timings, localizedPrayerNames);
 
-      _prayerName = prayerTimes['prayerName']!;
-      _prayerTime = prayerTimes['prayerTime']!;
-      _nextPrayer = prayerTimes['nextPrayer']!;
+        _prayerName = prayerTimes['prayerName']!;
+        _prayerTime = prayerTimes['prayerTime']!;
+        _nextPrayer = prayerTimes['nextPrayer']!;
+      }
 
       notifyListeners();
     } catch (e) {
@@ -51,4 +53,7 @@ class PrayerTimeManager extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  static List<String> get prayersToSchedule =>
+      ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 }

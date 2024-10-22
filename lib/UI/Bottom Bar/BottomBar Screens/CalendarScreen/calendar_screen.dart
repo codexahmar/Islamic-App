@@ -13,6 +13,8 @@ class HijriCalendarScreen extends StatefulWidget {
 
 class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
   HijriCalendar _currentMonth = HijriCalendar.now();
+  HijriCalendar? _selectedDate = HijriCalendar.now();
+  int? _selectedDayOfWeek; // Change this line
 
   @override
   Widget build(BuildContext context) {
@@ -120,11 +122,13 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
   Widget _buildDayHeaders(double screenWidth) {
     List<String> weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     int currentDayIndex = DateTime.now().weekday % 7;
+    bool isCurrentMonth = _currentMonth.hYear == HijriCalendar.now().hYear &&
+        _currentMonth.hMonth == HijriCalendar.now().hMonth;
 
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.02,
-        vertical: screenWidth * 0.01, // Reduced vertical padding
+        vertical: screenWidth * 0.01,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -132,27 +136,33 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
           (entry) {
             int index = entry.key;
             String day = entry.value;
-            bool isToday = index == currentDayIndex;
+            bool isToday = index == currentDayIndex && isCurrentMonth;
+            bool isSelected =
+                _selectedDayOfWeek != null && index == _selectedDayOfWeek;
 
-            return Column(
-              children: [
-                Center(
-                  child: Text(
-                    day,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isToday ? primaryColor : Colors.black,
+            return GestureDetector(
+              onTap: () => _selectDayOfWeek(index),
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      day,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? primaryColor
+                            : (isToday ? Colors.blue : Colors.black),
+                      ),
                     ),
                   ),
-                ),
-                if (isToday)
                   Container(
                     margin: EdgeInsets.only(top: screenWidth * 0.01),
                     width: screenWidth * 0.1,
                     height: screenWidth * 0.01,
-                    color: primaryColor,
+                    color: isToday ? Colors.blue : Colors.transparent,
                   ),
-              ],
+                ],
+              ),
             );
           },
         ).toList(),
@@ -162,7 +172,7 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
 
   Widget _buildCalendarGrid() {
     int totalDays = _currentMonth.lengthOfMonth;
-    int firstWeekday = _currentMonth.hDay;
+    int firstWeekday = _currentMonth.weekDay();
     List<Widget> dayCells = [];
 
     for (int i = 1; i < firstWeekday; i++) {
@@ -170,23 +180,44 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
     }
 
     for (int i = 1; i <= totalDays; i++) {
-      bool isToday = _currentMonth.hDay == i &&
-          _currentMonth.hMonth == HijriCalendar.now().hMonth &&
-          _currentMonth.hYear == HijriCalendar.now().hYear;
+      HijriCalendar currentDate = HijriCalendar()
+        ..hYear = _currentMonth.hYear
+        ..hMonth = _currentMonth.hMonth
+        ..hDay = i;
+
+      bool isToday = currentDate.hDay == HijriCalendar.now().hDay &&
+          currentDate.hMonth == HijriCalendar.now().hMonth &&
+          currentDate.hYear == HijriCalendar.now().hYear;
+
+      bool isSelected = _selectedDate != null &&
+          currentDate.hDay == _selectedDate!.hDay &&
+          currentDate.hMonth == _selectedDate!.hMonth &&
+          currentDate.hYear == _selectedDate!.hYear;
 
       dayCells.add(
-        Container(
-          margin: EdgeInsets.all(4.0),
-          decoration: BoxDecoration(
-            color: isToday ? primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Center(
-            child: Text(
-              '$i',
-              style: TextStyle(
-                color: isToday ? Colors.white : Colors.black,
-                fontWeight: FontWeight.bold,
+        GestureDetector(
+          onTap: () => _selectDate(currentDate),
+          child: Container(
+            margin: EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? primaryColor
+                  : (isToday
+                      ? primaryColor.withOpacity(0.3)
+                      : Colors.transparent),
+              borderRadius: BorderRadius.circular(12.0),
+              border:
+                  isToday ? Border.all(color: primaryColor, width: 2) : null,
+            ),
+            child: Center(
+              child: Text(
+                '$i',
+                style: TextStyle(
+                  color: isSelected
+                      ? Colors.white
+                      : (isToday ? primaryColor : Colors.black),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -197,8 +228,7 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
     return Expanded(
       child: GridView.count(
         crossAxisCount: 7,
-
-        padding: EdgeInsets.zero, // Remove extra padding
+        padding: EdgeInsets.zero,
         children: dayCells,
       ),
     );
@@ -210,6 +240,8 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
           .hijriToGregorian(
               _currentMonth.hYear, _currentMonth.hMonth, _currentMonth.hDay)
           .subtract(Duration(days: 30)));
+      _selectedDate = null;
+      _selectedDayOfWeek = null;
     });
   }
 
@@ -219,6 +251,32 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
           .hijriToGregorian(
               _currentMonth.hYear, _currentMonth.hMonth, _currentMonth.hDay)
           .add(Duration(days: 30)));
+      _selectedDate = null;
+      _selectedDayOfWeek = null;
     });
+  }
+
+  void _selectDate(HijriCalendar date) {
+    setState(() {
+      _selectedDate = date;
+    });
+    // You can add additional logic here, such as showing a dialog or updating other parts of the UI
+    print('Selected date: ${date.hDay}/${date.hMonth}/${date.hYear}');
+  }
+
+  void _selectDayOfWeek(int index) {
+    setState(() {
+      _selectedDayOfWeek = index;
+    });
+    // You can add additional logic here for when a day of the week is selected
+    print('Selected day of week: ${[
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ][index]}');
   }
 }

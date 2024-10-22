@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:just_audio/just_audio.dart';
+import 'package:quran_app/UI/Screens/playback_screen.dart';
 import 'package:quran_app/UI/constants/constants.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'dart:io';
 
 import '../../generated/l10n.dart';
 
@@ -20,6 +23,62 @@ class _Mp3ScreenState extends State<Mp3Screen> {
   Duration _totalDuration = Duration.zero;
   bool _isPlaying = false;
 
+
+
+  RewardedAd? _rewardedAd;
+
+  // TODO: replace this test ad unit with your own ad unit.
+  final adUnitId = Platform.isAndroid
+    ? 'ca-app-pub-3940256099942544/5224354917'
+    : 'ca-app-pub-3940256099942544/1712485313';
+
+  /// Loads a rewarded ad.
+  void loadAd() {
+    RewardedAd.load(
+        adUnitId: adUnitId,
+        request: const AdRequest(),
+        rewardedAdLoadCallback: RewardedAdLoadCallback(
+          // Called when an ad is successfully received.
+          onAdLoaded: (ad) {
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              // Called when the ad showed the full screen content.
+              onAdShowedFullScreenContent: (ad) {},
+              // Called when an impression occurs on the ad.
+              onAdImpression: (ad) {},
+              // Called when the ad failed to show full screen content.
+              onAdFailedToShowFullScreenContent: (ad, err) {
+                // Dispose the ad here to free resources.
+                ad.dispose();
+              },
+              // Called when the ad dismissed full screen content.
+              onAdDismissedFullScreenContent: (ad) {
+                // Dispose the ad here to free resources.
+                ad.dispose();
+              },
+              // Called when a click is recorded for an ad.
+              onAdClicked: (ad) {});
+
+            debugPrint('$ad loaded.');
+            // Keep a reference to the ad so you can show it later.
+            _rewardedAd = ad;
+
+
+
+
+
+_rewardedAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
+  // Reward the user for watching an ad.
+});
+
+          },
+          // Called when an ad request failed.
+          onAdFailedToLoad: (LoadAdError error) {
+            debugPrint('RewardedAd failed to load: $error');
+          },
+        ));
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +89,7 @@ class _Mp3ScreenState extends State<Mp3Screen> {
           _currentPosition = position;
         });
       }
+         loadAd();
     });
 
     _audioPlayer.durationStream.listen((Duration? duration) {
@@ -211,11 +271,70 @@ class _Mp3ScreenState extends State<Mp3Screen> {
                         ],
                       ),
                     ),
-                    onTap: () {
-                      if (_playingSurah == surahNumber) {
-                        _stopSurah();
+                    onTap: () async {
+                      if (await checkInternetConnectivity()) {
+                        if (_playingSurah == surahNumber) {
+                          _stopSurah();
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => PlaybackScreen(
+                                surahName: surahName,
+                                audioUrl: quran.getAudioURLBySurah(surahNumber),
+                                autoPlay: true,
+                                currentSurahNumber: surahNumber,
+                              ),
+                            ),
+                          );
+                        }
                       } else {
-                        _playSurah(surahNumber);
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("No Internet Connection"),
+                              content: Text(
+                                  "Please check your internet connection and try again."),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text("Retry"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    checkInternetConnectivity()
+                                        .then((connected) {
+                                      if (connected) {
+                                        // If connected after retry, perform the original action
+                                        if (_playingSurah == surahNumber) {
+                                          _stopSurah();
+                                        } else {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PlaybackScreen(
+                                                surahName: surahName,
+                                                audioUrl:
+                                                    quran.getAudioURLBySurah(
+                                                        surahNumber),
+                                                autoPlay: true,
+                                                currentSurahNumber: surahNumber,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    });
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text(localizations.cancel),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       }
                     },
                   ),
@@ -318,5 +437,15 @@ class _Mp3ScreenState extends State<Mp3Screen> {
         ],
       ),
     );
+  }
+
+  // Add this method to check internet connectivity
+  Future<bool> checkInternetConnectivity() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } on SocketException catch (_) {
+      return false;
+    }
   }
 }

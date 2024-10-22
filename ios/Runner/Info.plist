@@ -12,7 +12,10 @@
 <string>We need your location to determine the Qibla direction even in the background.</string>
 <key>NSMotionUsageDescription</key>
 <string>We need access to motion sensors to show the compass for Qibla direction.</string>
-
+<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 <key>NSAppTransportSecurity</key>
 <dict>
   <key>NSAllowsArbitraryLoads</key>

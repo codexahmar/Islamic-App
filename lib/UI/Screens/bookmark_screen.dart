@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quran/quran.dart' as quran;
 import '../../generated/l10n.dart';
 import 'surah_details_screen.dart';
+import 'dart:convert';
 
 class BookmarkScreen extends StatefulWidget {
   const BookmarkScreen({super.key});
@@ -22,20 +23,21 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
 
   Future<void> _loadBookmarks() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    Set<String> keys = prefs.getKeys();
     List<Map<String, dynamic>> loadedBookmarks = [];
 
-    for (String key in keys) {
-      if (key.startsWith('bookmark_')) {
-        int surahNumber = int.parse(key.split('_')[1]);
-        int pageNumber = prefs.getInt(key)!;
-        String surahName = quran.getSurahName(surahNumber);
+    for (int i = 1; i <= 114; i++) {
+      String? bookmarksJson = prefs.getString('bookmarks_$i');
+      if (bookmarksJson != null) {
+        List<int> surahBookmarks = List<int>.from(jsonDecode(bookmarksJson));
+        String surahName = quran.getSurahName(i);
 
-        loadedBookmarks.add({
-          'surahNumber': surahNumber,
-          'pageNumber': pageNumber,
-          'surahName': surahName,
-        });
+        for (int pageNumber in surahBookmarks) {
+          loadedBookmarks.add({
+            'surahNumber': i,
+            'pageNumber': pageNumber,
+            'surahName': surahName,
+          });
+        }
       }
     }
 
@@ -44,20 +46,30 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
     });
   }
 
-  Future<void> _removeBookmark(int surahNumber) async {
+  Future<void> _removeBookmark(int surahNumber, int pageNumber) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String key = 'bookmark_$surahNumber';
+    String key = 'bookmarks_$surahNumber';
+    String? bookmarksJson = prefs.getString(key);
 
-    if (prefs.containsKey(key)) {
-      await prefs.remove(key);
+    if (bookmarksJson != null) {
+      List<int> surahBookmarks = List<int>.from(jsonDecode(bookmarksJson));
+      surahBookmarks.remove(pageNumber);
+
+      if (surahBookmarks.isEmpty) {
+        await prefs.remove(key);
+      } else {
+        await prefs.setString(key, jsonEncode(surahBookmarks));
+      }
     }
+
     setState(() {
-      bookmarks
-          .removeWhere((bookmark) => bookmark['surahNumber'] == surahNumber);
+      bookmarks.removeWhere((bookmark) =>
+          bookmark['surahNumber'] == surahNumber &&
+          bookmark['pageNumber'] == pageNumber);
     });
   }
 
-  void _showRemoveDialog(int surahNumber) {
+  void _showRemoveDialog(int surahNumber, int pageNumber) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -66,14 +78,12 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           content: Text(S.of(context).removeBookmarkContent),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: Text(S.of(context).cancel),
             ),
             TextButton(
               onPressed: () {
-                _removeBookmark(surahNumber);
+                _removeBookmark(surahNumber, pageNumber);
                 Navigator.of(context).pop();
               },
               child: Text(S.of(context).yes),
@@ -145,11 +155,12 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                         ),
                       ),
                       subtitle: Text(
-                          S.of(context).pageNumber(bookmark['pageNumber'] + 1)),
+                          S.of(context).pageNumber(bookmark['pageNumber'])),
                       trailing: IconButton(
                         icon: Icon(Icons.bookmark, color: Colors.yellow[700]),
                         onPressed: () {
-                          _showRemoveDialog(bookmark['surahNumber']);
+                          _showRemoveDialog(
+                              bookmark['surahNumber'], bookmark['pageNumber']);
                         },
                       ),
                       onTap: () {
@@ -158,6 +169,8 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                           MaterialPageRoute(
                             builder: (context) => SurahDetailScreen(
                               surahNumber: bookmark['surahNumber'],
+                              initialPage: bookmark['pageNumber'] -
+                                  1, // Subtract 1 to convert from 1-based to 0-based index
                             ),
                           ),
                         );
