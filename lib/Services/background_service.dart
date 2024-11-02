@@ -3,11 +3,13 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../Utils/prayer_times_manager.dart';
 
 class BackgroundService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  static final AudioPlayer _audioPlayer = AudioPlayer();
 
   static Future<void> initializeNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -83,6 +85,7 @@ class BackgroundService {
       channelDescription: 'Notifications for prayer times',
       importance: Importance.max,
       priority: Priority.high,
+
       playSound: true,
       sound: RawResourceAndroidNotificationSound('azaan'),
       enableVibration: true,
@@ -96,5 +99,16 @@ class BackgroundService {
       'It\'s time for $prayer prayer',
       platformChannelSpecifics,
     );
+
+    // Play the azaan sound
+    await _playAlarmSound();
+  }
+
+  static Future<void> _playAlarmSound() async {
+    try {
+      await _audioPlayer.play(AssetSource('audio/azaan.mp3'));
+    } catch (e) {
+      print('Error playing sound: $e');
+    }
   }
 }

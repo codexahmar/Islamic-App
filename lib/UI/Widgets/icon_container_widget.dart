@@ -14,7 +14,7 @@ class IconContainerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // Added padding to adjust the container
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      padding: const EdgeInsets.all(4.0),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -22,13 +22,10 @@ class IconContainerWidget extends StatelessWidget {
           // Added box shadow
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1), // Shadow color
-              spreadRadius: 2, // Spread radius
-              blurRadius: 5, // Blur radius
-              offset: Offset(
-                1.5,
-                3.5,
-              ), // Changes the position of the shadow
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
           ],
         ),

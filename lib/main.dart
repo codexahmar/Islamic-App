@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:quran_app/providers/alarm_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'Utils/prayer_times_manager.dart';
@@ -10,12 +11,22 @@ import 'generated/l10n.dart';
 import 'UI/Screens/splash_screen.dart';
 import 'providers/location_provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MobileAds.instance.initialize();
 
   tz.initializeTimeZones();
+
+  // Initialize flutter_local_notifications
+  // flutterLocalNotificationsPlugin
+  //     .resolvePlatformSpecificImplementation<
+  //         AndroidFlutterLocalNotificationsPlugin>()
+  //     ?.requestNotificationsPermission();
 
   final prefs = await SharedPreferences.getInstance();
   final String? languageCode = prefs.getString('languageCode');
@@ -26,10 +37,19 @@ Future<void> main() async {
     androidNotificationOngoing: true,
   );
 
-  runApp(MyApp(
-    initialLocale:
-        languageCode != null ? Locale(languageCode) : const Locale('en'),
-  ));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LocationProvider()),
+        ChangeNotifierProvider(create: (_) => PrayerTimeManager()),
+        ChangeNotifierProvider(create: (_) => alarmprovider()),
+      ],
+      child: MyApp(
+        initialLocale:
+            languageCode != null ? Locale(languageCode) : const Locale('en'),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -63,37 +83,31 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => LocationProvider()),
-        ChangeNotifierProvider(create: (_) => PrayerTimeManager()),
-      ],
-      child: MaterialApp(
-        theme: ThemeData(
-          textTheme: GoogleFonts.poppinsTextTheme(),
-          scaffoldBackgroundColor: Colors.white,
-          useMaterial3: false,
-          appBarTheme: const AppBarTheme(
-            color: Colors.white,
-            elevation: 0,
-            titleTextStyle: TextStyle(color: Colors.black),
-            iconTheme: IconThemeData(color: Colors.black),
-          ),
-          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-            backgroundColor: Colors.white,
-          ),
+    return MaterialApp(
+      theme: ThemeData(
+        textTheme: GoogleFonts.poppinsTextTheme(),
+        scaffoldBackgroundColor: Colors.white,
+        useMaterial3: false,
+        appBarTheme: const AppBarTheme(
+          color: Colors.white,
+          elevation: 0,
+          titleTextStyle: TextStyle(color: Colors.black),
+          iconTheme: IconThemeData(color: Colors.black),
         ),
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        locale: _locale,
-        home: const SplashScreen(),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+        ),
       ),
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
+      locale: _locale,
+      home: const SplashScreen(),
     );
   }
 }

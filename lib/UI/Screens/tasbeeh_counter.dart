@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quran_app/UI/constants/constants.dart';
 
 import '../../Models/tasbeeh_model.dart';
 import '../../generated/l10n.dart';
@@ -46,7 +47,7 @@ class _TasbeehCounterState extends State<TasbeehCounter> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: const Color(0xFF1F4068),
+        backgroundColor: primaryColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -54,12 +55,7 @@ class _TasbeehCounterState extends State<TasbeehCounter> {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/islamic_background.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+        decoration: const BoxDecoration(),
         child: FutureBuilder<List<Tasbeeh>>(
           future: _futureTasbeeh,
           builder: (context, snapshot) {
@@ -92,11 +88,11 @@ class _TasbeehCounterState extends State<TasbeehCounter> {
                         Container(
                           decoration: BoxDecoration(
                             color: _selectedIndex == index
-                                ? Color(0xFF1F4068).withOpacity(0.9)
+                                ? primaryColor.withOpacity(0.9)
                                 : Colors.white.withOpacity(0.9),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Color(0xFFE6B17E),
+                              color: primaryColor,
                               width: 2,
                             ),
                             boxShadow: [
@@ -118,7 +114,7 @@ class _TasbeehCounterState extends State<TasbeehCounter> {
                                   fontWeight: FontWeight.bold,
                                   color: _selectedIndex == index
                                       ? Colors.white
-                                      : Color(0xFF1F4068),
+                                      : primaryColor,
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -129,7 +125,7 @@ class _TasbeehCounterState extends State<TasbeehCounter> {
                                   fontWeight: FontWeight.w500,
                                   color: _selectedIndex == index
                                       ? Color(0xFFE6B17E)
-                                      : Color(0xFF1F4068),
+                                      : primaryColor,
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -154,7 +150,7 @@ class _TasbeehCounterState extends State<TasbeehCounter> {
                                     decoration: BoxDecoration(
                                       color: _selectedIndex == index
                                           ? Color(0xFFE6B17E)
-                                          : Color(0xFF1F4068),
+                                          : primaryColor,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
@@ -221,7 +217,7 @@ class _TasbeehCounterState extends State<TasbeehCounter> {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected ? Color(0xFFE6B17E) : Color(0xFF1F4068),
+        color: isSelected ? Color(0xFFE6B17E) : primaryColor,
       ),
       child: IconButton(
         icon: Icon(icon, color: isSelected ? Color(0xFF1F4068) : Colors.white),

@@ -109,13 +109,6 @@ class _NearbyMasjidsScreenState extends State<NearbyMasjidsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Nearby Masjids'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
       body: FlutterMap(
         mapController: _mapController,
         options: MapOptions(

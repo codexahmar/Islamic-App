@@ -4,7 +4,10 @@ import 'package:quran/quran.dart' as quran;
 import 'package:just_audio/just_audio.dart';
 import 'package:quran_app/UI/Screens/playback_screen.dart';
 import 'package:quran_app/UI/constants/constants.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:quran_app/Utils/ad_manager.dart';
+import 'package:quran_app/Utils/ad_state_mixin.dart';
+import 'package:quran_app/Utils/navigation_helper.dart';
+
 import 'dart:io';
 
 import '../../generated/l10n.dart';
@@ -16,68 +19,12 @@ class Mp3Screen extends StatefulWidget {
   State<Mp3Screen> createState() => _Mp3ScreenState();
 }
 
-class _Mp3ScreenState extends State<Mp3Screen> {
+class _Mp3ScreenState extends State<Mp3Screen> with AdStateMixin<Mp3Screen> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   int? _playingSurah;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
   bool _isPlaying = false;
-
-
-
-  RewardedAd? _rewardedAd;
-
-  // TODO: replace this test ad unit with your own ad unit.
-  final adUnitId = Platform.isAndroid
-    ? 'ca-app-pub-3940256099942544/5224354917'
-    : 'ca-app-pub-3940256099942544/1712485313';
-
-  /// Loads a rewarded ad.
-  void loadAd() {
-    RewardedAd.load(
-        adUnitId: adUnitId,
-        request: const AdRequest(),
-        rewardedAdLoadCallback: RewardedAdLoadCallback(
-          // Called when an ad is successfully received.
-          onAdLoaded: (ad) {
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-              // Called when the ad showed the full screen content.
-              onAdShowedFullScreenContent: (ad) {},
-              // Called when an impression occurs on the ad.
-              onAdImpression: (ad) {},
-              // Called when the ad failed to show full screen content.
-              onAdFailedToShowFullScreenContent: (ad, err) {
-                // Dispose the ad here to free resources.
-                ad.dispose();
-              },
-              // Called when the ad dismissed full screen content.
-              onAdDismissedFullScreenContent: (ad) {
-                // Dispose the ad here to free resources.
-                ad.dispose();
-              },
-              // Called when a click is recorded for an ad.
-              onAdClicked: (ad) {});
-
-            debugPrint('$ad loaded.');
-            // Keep a reference to the ad so you can show it later.
-            _rewardedAd = ad;
-
-
-
-
-
-_rewardedAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
-  // Reward the user for watching an ad.
-});
-
-          },
-          // Called when an ad request failed.
-          onAdFailedToLoad: (LoadAdError error) {
-            debugPrint('RewardedAd failed to load: $error');
-          },
-        ));
-  }
-
 
   @override
   void initState() {
@@ -89,7 +36,6 @@ _rewardedAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) 
           _currentPosition = position;
         });
       }
-         loadAd();
     });
 
     _audioPlayer.durationStream.listen((Duration? duration) {
@@ -180,6 +126,11 @@ _rewardedAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) 
 
   @override
   Widget build(BuildContext context) {
+    // Show ad when screen is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdManager.showAdIfAvailable();
+    });
+
     final localizations = S.of(context);
 
     return Scaffold(
@@ -276,14 +227,13 @@ _rewardedAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) 
                         if (_playingSurah == surahNumber) {
                           _stopSurah();
                         } else {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => PlaybackScreen(
-                                surahName: surahName,
-                                audioUrl: quran.getAudioURLBySurah(surahNumber),
-                                autoPlay: true,
-                                currentSurahNumber: surahNumber,
-                              ),
+                          NavigationHelper.pushScreen(
+                            context,
+                            PlaybackScreen(
+                              surahName: surahName,
+                              audioUrl: quran.getAudioURLBySurah(surahNumber),
+                              autoPlay: true,
+                              currentSurahNumber: surahNumber,
                             ),
                           );
                         }
@@ -303,21 +253,18 @@ _rewardedAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) 
                                     checkInternetConnectivity()
                                         .then((connected) {
                                       if (connected) {
-                                        // If connected after retry, perform the original action
                                         if (_playingSurah == surahNumber) {
                                           _stopSurah();
                                         } else {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  PlaybackScreen(
-                                                surahName: surahName,
-                                                audioUrl:
-                                                    quran.getAudioURLBySurah(
-                                                        surahNumber),
-                                                autoPlay: true,
-                                                currentSurahNumber: surahNumber,
-                                              ),
+                                          NavigationHelper.pushScreen(
+                                            context,
+                                            PlaybackScreen(
+                                              surahName: surahName,
+                                              audioUrl:
+                                                  quran.getAudioURLBySurah(
+                                                      surahNumber),
+                                              autoPlay: true,
+                                              currentSurahNumber: surahNumber,
                                             ),
                                           );
                                         }

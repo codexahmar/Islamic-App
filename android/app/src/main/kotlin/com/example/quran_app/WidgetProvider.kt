@@ -1,4 +1,4 @@
-package com.example.quran_app
+package com.islamicazan.shzoneabbe
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider

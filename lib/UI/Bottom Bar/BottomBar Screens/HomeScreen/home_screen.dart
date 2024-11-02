@@ -5,9 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_app/UI/Screens/prayer_screen.dart';
+import 'package:quran_app/UI/constants/constants.dart';
 import 'package:quran_app/generated/l10n.dart';
 import 'package:quran_app/Utils/location_util.dart';
 
+import '../../../../Utils/ad_manager.dart';
+import '../../../../Utils/ad_state_mixin.dart';
+import '../../../../Utils/navigation_helper.dart';
 import '../../../../Utils/prayer_times_manager.dart';
 import '../../../Screens/40_rabana.dart';
 import '../../../Screens/Allah_names.dart';
@@ -34,7 +38,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
   late List<Map<String, dynamic>> featureItems;
   bool _isInitialized = false;
 
@@ -155,6 +159,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Show ad when screen is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AdManager.showAdIfAvailable();
+    });
+
     if (!_isInitialized) {
       return Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -164,58 +173,85 @@ class _HomeScreenState extends State<HomeScreen> {
     final prayerTimeManager = Provider.of<PrayerTimeManager>(context);
     return WillPopScope(
       onWillPop: () async {
-        // Show confirmation dialog
+        // Show custom confirmation dialog
         final shouldClose = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: Colors.white, // Background color
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0), // Rounded corners
+              borderRadius: BorderRadius.circular(
+                  15.0), // Add this line for rounded corners
             ),
-            title: Text(
-              'Confirm Exit',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black, // Title color
-              ),
-            ),
-            content: Padding(
-              padding: const EdgeInsets.symmetric(
-                  vertical: 10.0), // Padding for content
-              child: Text(
-                'Are you sure you want to close the app?',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54, // Content color
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/app_logo.png', // Replace with your app logo path
+                  width: 80,
+                  height: 80,
                 ),
-              ),
+                SizedBox(height: 16),
+                Text(
+                  "Are you sure you want to quit?",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false), // No
-                child: Text(
-                  'No',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w600, // Button text style
+              SizedBox(height: 20), // Add spacing above the buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                15.0), // Add rounded corners to the button
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: Text(
+                          "No",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true), // Yes
-                child: Text(
-                  'Yes',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.w600, // Button text style
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                15.0), // Add rounded corners to the button
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: Text(
+                          "Yes",
+                          style: TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
+              SizedBox(height: 20), // Add spacing below the buttons
             ],
           ),
         );
-        return shouldClose ?? false; // Close the app if user confirms
+
+        return shouldClose ?? false;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -226,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(
               S.of(context).appTitle,
               style: GoogleFonts.poppins(
-                  fontSize: 24, fontWeight: FontWeight.w700),
+                  fontSize: 20, fontWeight: FontWeight.w700),
             ),
           ),
           actions: [
@@ -270,11 +306,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       InkWell(
                         onTap: () {
-                          Navigator.push(
+                          NavigationHelper.pushScreen(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => SurahListScreen(),
-                            ),
+                            SurahListScreen(),
                           );
                         },
                         child: IconContainerWidget(
@@ -284,11 +318,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       InkWell(
                         onTap: () {
-                          Navigator.push(
+                          NavigationHelper.pushScreen(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => JuzzListScreen(),
-                            ),
+                            JuzzListScreen(),
                           );
                         },
                         child: IconContainerWidget(
@@ -298,11 +330,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       InkWell(
                         onTap: () {
-                          Navigator.push(
+                          NavigationHelper.pushScreen(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => Mp3Screen(),
-                            ),
+                            Mp3Screen(),
                           );
                         },
                         child: IconContainerWidget(
@@ -312,19 +342,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       InkWell(
                         onTap: () {
-                          Navigator.push(
+                          NavigationHelper.pushScreen(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => BookmarkScreen(),
-                            ),
+                            BookmarkScreen(),
                           );
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.all(3.0),
-                          child: IconContainerWidget(
-                            imagePath: "assets/images/bookmark_icon.png",
-                            label: S.of(context).bookmark,
-                          ),
+                        child: IconContainerWidget(
+                          imagePath: "assets/images/bookmark_icon.png",
+                          label: S.of(context).bookmark,
                         ),
                       ),
                     ],
@@ -347,12 +372,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     return InkWell(
                       onTap: () {
-                        Navigator.push(
+                        NavigationHelper.pushScreen(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                featureItems[index]["screen"] as Widget,
-                          ),
+                          featureItems[index]["screen"] as Widget,
                         );
                       },
                       child: FeatureItemWidget(

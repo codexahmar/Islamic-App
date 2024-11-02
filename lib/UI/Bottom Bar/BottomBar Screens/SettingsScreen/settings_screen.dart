@@ -1,18 +1,13 @@
-import 'dart:io';
-import 'dart:async';
+// import 'package:share_plus/share_plus.dart';
+import 'package:quran_app/main.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:quran_app/generated/l10n.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:quran_app/main.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter/services.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../Widgets/premiumcard.dart';
 import '../../../Widgets/settingsCard.dart';
 import '../../../Widgets/location_widget.dart';
 import '../../../constants/constants.dart';
@@ -42,7 +37,7 @@ class SettingsScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: const [
-              PremiumUpgradeCard(),
+              // PremiumUpgradeCard(),
               SizedBox(height: 40),
               SettingsOptionCard(),
             ],
@@ -61,25 +56,8 @@ class SettingsOptionCard extends StatefulWidget {
 }
 
 class _SettingsOptionCardState extends State<SettingsOptionCard> {
-  InterstitialAd? _interstitialAd;
-  final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/1033173712'
-      : 'ca-app-pub-3940256099942544/4411468910';
-
-  FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
-  AudioPlayer audioPlayer = AudioPlayer();
-
-  String _currentLanguage = 'en'; // Default to English
-
   void _initializeMobileAdsSDK() async {
     MobileAds.instance.initialize();
-    _loadAd();
-  }
-
-  @override
-  void dispose() {
-    _interstitialAd?.dispose();
-    super.dispose();
   }
 
   @override
@@ -87,107 +65,16 @@ class _SettingsOptionCardState extends State<SettingsOptionCard> {
     super.initState();
 
     _initializeMobileAdsSDK();
-    _loadAd();
-    _initializeNotifications();
+
     _loadCurrentLanguage();
   }
 
-  void _initializeNotifications() async {
-    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    final InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
-    await flutterLocalNotificationsPlugin!.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse:
-          (NotificationResponse notificationResponse) {
-        // Handle notification taps here
-      },
-    );
+  final url_app =
+      'https://play.google.com/store/apps/details?id=com.islamicazan.shzoneabbe';
+  final privacy_policy =
+      'https://www.termsfeed.com/live/63aa5ba8-5201-4175-bf28-97950de2f568';
 
-    // Request notification permissions for Android 13+
-    if (Platform.isAndroid) {
-      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-          flutterLocalNotificationsPlugin!
-              .resolvePlatformSpecificImplementation<
-                  AndroidFlutterLocalNotificationsPlugin>();
-
-      if (androidImplementation != null) {
-        await androidImplementation.requestNotificationsPermission();
-      }
-    }
-  }
-
-  Future<void> _showInstantNotification() async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'instant_channel_id',
-      'Instant Notifications',
-      channelDescription: 'Notifications for instant messages',
-      importance: Importance.max,
-      priority: Priority.high,
-      sound: RawResourceAndroidNotificationSound('azaan'),
-      playSound: true,
-    );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-    try {
-      await flutterLocalNotificationsPlugin!.show(
-        0,
-        'Share App',
-        'Thanks for sharing our app!',
-        platformChannelSpecifics,
-      );
-      await audioPlayer.play(AssetSource('audio/azaan.mp3'));
-    } on PlatformException catch (e) {
-      print('Failed to show notification: ${e.message}');
-    }
-  }
-
-  Future<void> _scheduleDelayedNotification() async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'delayed_channel_id',
-      'Delayed Notifications',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin!.zonedSchedule(
-      1,
-      'Share App Reminder',
-      'Don\'t forget to share our app with your friends!',
-      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
-      platformChannelSpecifics,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
-  }
-
-  void _loadAd() {
-    InterstitialAd.load(
-      adUnitId: _adUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          _interstitialAd = ad;
-        },
-        onAdFailedToLoad: (error) {
-          print('InterstitialAd failed to load: $error');
-        },
-      ),
-    );
-  }
-
-  void _loadCurrentLanguage() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _currentLanguage = prefs.getString('languageCode') ?? 'en';
-    });
-  }
+  String _currentLanguage = 'en'; // Default to English
 
   @override
   Widget build(BuildContext context) {
@@ -212,8 +99,11 @@ class _SettingsOptionCardState extends State<SettingsOptionCard> {
               title: S.of(context).privacyPolicy,
               imagePath: "assets/images/arrow.png",
               color: primaryColor,
-              onTap: () {
-                // Handle tap for Privacy Policy
+              onTap: () async {
+                final Uri _url = Uri.parse(privacy_policy);
+                if (!await launchUrl(_url)) {
+                  throw Exception('Could not launch $_url');
+                }
               },
             ),
             const SizedBox(height: 10),
@@ -221,9 +111,13 @@ class _SettingsOptionCardState extends State<SettingsOptionCard> {
               title: S.of(context).shareApp,
               imagePath: "assets/images/arrow.png",
               color: primaryColor,
-              onTap: () {
-                _showInstantNotification();
-                _scheduleDelayedNotification();
+              onTap: () async {
+                final Uri _url = Uri.parse(url_app);
+                if (!await launchUrl(_url)) {
+                  throw Exception('Could not launch $_url');
+                }
+                // Share.share('Check out this app: $url_app'); // Replace with your app link
+
                 // Add your share app logic here
               },
             ),
@@ -232,7 +126,11 @@ class _SettingsOptionCardState extends State<SettingsOptionCard> {
               title: S.of(context).rateUs,
               imagePath: "assets/images/arrow.png",
               color: primaryColor,
-              onTap: () {
+              onTap: () async {
+                final Uri _url = Uri.parse(url_app);
+                if (!await launchUrl(_url)) {
+                  throw Exception('Could not launch $_url');
+                }
                 // Handle tap for Rate Us
               },
             ),
@@ -241,9 +139,11 @@ class _SettingsOptionCardState extends State<SettingsOptionCard> {
               title: S.of(context).moreApps,
               imagePath: "assets/images/arrow.png",
               color: primaryColor,
-              onTap: () {
-                // Handle tap for More Apps
-                _interstitialAd?.show();
+              onTap: () async {
+                final Uri _url = Uri.parse(url_app);
+                if (!await launchUrl(_url)) {
+                  throw Exception('Could not launch $_url');
+                }
               },
             ),
             const SizedBox(height: 10),
@@ -306,5 +206,12 @@ class _SettingsOptionCardState extends State<SettingsOptionCard> {
 
     // Reload the app with the selected locale
     MyApp.setLocale(context, Locale(languageCode));
+  }
+
+  void _loadCurrentLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _currentLanguage = prefs.getString('languageCode') ?? 'en';
+    });
   }
 }

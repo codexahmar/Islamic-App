@@ -28,7 +28,7 @@ class PrayerTimeManager extends ChangeNotifier {
         final l10n = S.of(context);
         final localizedPrayerNames = {
           'Fajr': l10n.fajr,
-          'Sunrise': l10n.sunrise,
+
           'Dhuhr': l10n.dhuhr,
           'Asr': l10n.asr,
           'Maghrib': l10n.maghrib,

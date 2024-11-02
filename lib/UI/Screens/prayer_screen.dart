@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:permission_handler/permission_handler.dart';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
@@ -19,6 +20,8 @@ import '../../Utils/prayer_times_manager.dart';
 import '../Widgets/location_widget.dart';
 import '../Widgets/prayer_info_widget.dart';
 import 'package:quran_app/services/background_service.dart';
+
+
 
 class PrayerScreen extends StatefulWidget {
   const PrayerScreen({super.key});
@@ -32,87 +35,112 @@ class _PrayerScreenState extends State<PrayerScreen> {
   FlutterLocalNotificationsPlugin? _flutterLocalNotificationsPlugin;
   final AudioPlayer audioPlayer = AudioPlayer();
 
-  // Change this to a late initialized variable
-  late Set<String> _enabledNotifications;
+  // Initialize _enabledNotifications as an empty set directly
+  Set<String> _enabledNotifications = {};
 
   @override
   void initState() {
     super.initState();
     tz.initializeTimeZones();
     _initializeNotifications();
-    _requestPermissions();
-    _loadEnabledNotifications();
+    // _requestPermissions();
+    _loadEnabledNotifications(); // Ensure this is called to load saved notifications
     _initializeBackgroundService();
+    _configureSelectNotificationSubject();
   }
 
-  Future<void> _requestPermissions() async {
-    // Request location permissions
-    var locationStatus = await Permission.location.request();
-    if (locationStatus.isGranted) {
-      print("Location permission granted");
-    } else if (locationStatus.isDenied) {
-      print("Location permission denied");
-      _showPermissionDeniedDialog("Location");
-    } else if (locationStatus.isPermanentlyDenied) {
-      print("Location permission permanently denied");
-      openAppSettings();
-    }
+  // Future<void> _requestPermissions() async {
+  //   // Request location permissions
+  //   var locationStatus = await Permission.location.request();
+  //   if (locationStatus.isGranted) {
+  //     print("Location permission granted");
+  //   } else if (locationStatus.isDenied) {
+  //     print("Location permission denied");
+  //     _showPermissionDeniedDialog("Location");
+  //   } else if (locationStatus.isPermanentlyDenied) {
+  //     print("Location permission permanently denied");
+  //     openAppSettings();
+  //   }
 
-    // Request notification permissions
-    var notificationStatus = await Permission.notification.request();
-    if (notificationStatus.isGranted) {
-      print("Notification permission granted");
-    } else if (notificationStatus.isDenied) {
-      print("Notification permission denied");
-      _showPermissionDeniedDialog("Notification");
-    } else if (notificationStatus.isPermanentlyDenied) {
-      print("Notification permission permanently denied");
-      openAppSettings();
-    }
-  }
+  //   // Request notification permissions
+  //   var notificationStatus = await Permission.notification.request();
+  //   if (notificationStatus.isGranted) {
+  //     print("Notification permission granted");
+  //   } else if (notificationStatus.isDenied) {
+  //     print("Notification permission denied");
+  //     _showPermissionDeniedDialog("Notification");
+  //   } else if (notificationStatus.isPermanentlyDenied) {
+  //     print("Notification permission permanently denied");
+  //     openAppSettings();
+  //   }
+  // }
 
-  void _showPermissionDeniedDialog(String permissionType) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Permission Required"),
-          content: Text(
-              "$permissionType permission is required for the app to function properly. Please allow it in the settings."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _requestPermissions();
-              },
-              child: Text("Retry"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                openAppSettings();
-              },
-              child: Text("Open Settings"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showPermissionDeniedDialog(String permissionType) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: Text("Permission Required"),
+  //         content: Text(
+  //             "$permissionType permission is required for the app to function properly. Please allow it in the settings."),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //               _requestPermissions();
+  //             },
+  //             child: Text("Retry"),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //               openAppSettings();
+  //             },
+  //             child: Text("Open Settings"),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   void _initializeNotifications() async {
     _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    final DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      onDidReceiveLocalNotification:
+          (int id, String? title, String? body, String? payload) async {
+        // Handle iOS foreground notification
+      },
+    );
+
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
 
     await _flutterLocalNotificationsPlugin!.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        audioPlayer.stop();
-        // Handle any other notification tapped logic here
+        // This is called when the app is in the foreground and we receive a notification
+        if (response.payload == 'custom_alarm') {
+          final now = DateTime.now();
+          print(
+              "Custom alarm notification triggered at: ${now.toLocal()} (${now.hour}:${now.minute} ${now.hour >= 12 ? 'PM' : 'AM'})"); // Log current time
+
+          // Log to indicate that the alarm has been triggered
+          print(
+              "Alarm triggered!"); // This log indicates that the alarm has been triggered
+
+          // _playAlarmSound(); // Play sound when the notification is triggered
+        }
       },
     );
 
@@ -190,6 +218,50 @@ class _PrayerScreenState extends State<PrayerScreen> {
     );
   }
 
+  // Modify this method to remove the sound playback
+  Future<void> _showInstantNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'instant_channel_id',
+      'Instant Notifications',
+      channelDescription: 'Notifications for instant messages',
+      importance: Importance.max,
+      priority: Priority.high,
+
+      playSound: true, // Change this to true
+      sound: RawResourceAndroidNotificationSound('azaan'), // Add this line
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    try {
+      await _flutterLocalNotificationsPlugin!.show(
+        0,
+        'Prayer Notification',
+        'This is a test notification for prayer time!',
+        platformChannelSpecifics,
+        payload: 'instant_notification',
+      );
+    } on PlatformException catch (e) {
+      print('Failed to show notification: ${e.message}');
+    }
+  }
+
+  // Add this method to configure the notification tap listener
+  void _configureSelectNotificationSubject() {
+    _flutterLocalNotificationsPlugin!.initialize(
+      InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        iOS: DarwinInitializationSettings(),
+      ),
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        if (response.payload == 'instant_notification') {
+          _flutterLocalNotificationsPlugin!
+              .cancel(0); // Dismiss the notification
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
@@ -200,7 +272,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
         centerTitle: false,
         title: Text(
           l10n.prayerTiming,
-          style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.w700),
+          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -211,6 +283,15 @@ class _PrayerScreenState extends State<PrayerScreen> {
             padding: const EdgeInsets.all(8.0),
             child: LocationWidget(),
           ),
+          // IconButton(
+          //   icon: const Icon(Icons.alarm),
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => ClockScreen()),
+          //     );
+          //   },
+          // ),
         ],
       ),
       body: Padding(
@@ -231,8 +312,6 @@ class _PrayerScreenState extends State<PrayerScreen> {
                 children: [
                   _buildPrayerTimeTile(
                       'Fajr', prayerTimeManager.timings['Fajr'], l10n),
-                  _buildPrayerTimeTile(
-                      'Sunrise', prayerTimeManager.timings['Sunrise'], l10n),
                   _buildPrayerTimeTile(
                       'Dhuhr', prayerTimeManager.timings['Dhuhr'], l10n),
                   _buildPrayerTimeTile(
@@ -414,6 +493,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
     });
   }
 
+  // Modify the _toggleNotification method to include the instant notification
   void _toggleNotification(String prayerKey) {
     setState(() {
       if (_enabledNotifications.contains(prayerKey)) {
@@ -422,8 +502,10 @@ class _PrayerScreenState extends State<PrayerScreen> {
       } else {
         _enabledNotifications.add(prayerKey);
         _scheduleNotificationForPrayer(prayerKey);
+        _showInstantNotification(); // Show instant notification when enabling
+        _playAlarmSound(); // Play sound when enabling notification
       }
-      _saveEnabledNotifications(); // Add this line to save the changes
+      _saveEnabledNotifications();
     });
   }
 
@@ -446,7 +528,7 @@ class _PrayerScreenState extends State<PrayerScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _enabledNotifications =
-          prefs.getStringList('enabledNotifications')?.toSet() ?? Set<String>();
+          prefs.getStringList('enabledNotifications')?.toSet() ?? <String>{};
     });
   }
 
@@ -465,6 +547,9 @@ class _PrayerScreenState extends State<PrayerScreen> {
       androidConfiguration: AndroidConfiguration(
         onStart: BackgroundService.onStart,
         autoStart: true,
+        initialNotificationContent: 'Stay Connected To Your Faith',
+        initialNotificationTitle: 'Islamic App Active',
+        autoStartOnBoot: true,
         isForegroundMode: true,
       ),
       iosConfiguration: IosConfiguration(
@@ -475,5 +560,14 @@ class _PrayerScreenState extends State<PrayerScreen> {
     );
 
     service.startService();
+  }
+
+  // Add this method to play the alarm sound
+  void _playAlarmSound() async {
+    try {
+      await audioPlayer.play(AssetSource('audio/azaan.mp3'));
+    } catch (e) {
+      print('Error playing sound: $e');
+    }
   }
 }
