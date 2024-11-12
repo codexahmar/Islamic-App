@@ -8,16 +8,29 @@ class AdManager {
   static InterstitialAd? _interstitialAd;
   static bool _isAdLoaded = false;
   static DateTime? _lastAdShown;
-  static const Duration _minimumDurationBetweenAds = Duration(minutes: 2);
+  static const Duration _minimumDurationBetweenAds = Duration(minutes: 1);
 
-  // Test ad unit IDs - Replace with your actual ad unit IDs
+  // // Real Test ad unit IDs
+  
+  // static final String rewardedAdUnitId = Platform.isAndroid
+  //     ? 'ca-app-pub-6315848158314441/1262126766'
+  //     : 'ca-app-pub-3940256099942544/1712485313';
+  // // Real Test ad unit IDs
+
+  // static final String interstitialAdUnitId = Platform.isAndroid
+  //     ? 'ca-app-pub-6315848158314441/1189413490'
+  //     : 'ca-app-pub-3940256099942544/4411468910';
+
+
+  //  Test ad unit IDs
   static final String rewardedAdUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/5224354917'
-      : 'ca-app-pub-3940256099942544/1712485313';
+      ? 'ca-app-pub-3940256099942544/5224354917' // Test ID for Android
+      : 'ca-app-pub-3940256099942544/5224354917'; // Test ID for iOS (same test ID for both platforms)
 
+  // Test ad unit IDs
   static final String interstitialAdUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/1033173712'
-      : 'ca-app-pub-3940256099942544/4411468910';
+      ? 'ca-app-pub-3940256099942544/1033173712' // Test ID for Android
+      : 'ca-app-pub-3940256099942544/1033173712'; // Test ID for iOS (same test ID for both platforms)
 
   static void loadRandomAd() {
     // Dispose existing ads first

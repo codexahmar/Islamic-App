@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quran_app/UI/constants/constants.dart';
 
 class JuzDetailScreen extends StatelessWidget {
   final int juzNumber;
@@ -32,7 +33,7 @@ class JuzDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Juz $juzNumber', style: GoogleFonts.lateef(fontSize: 28)),
-        backgroundColor: Colors.teal[700],
+        backgroundColor: primaryColor,
       ),
       body: Container(
         child: SingleChildScrollView(
@@ -55,9 +56,9 @@ class SurahTitle extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.teal.withOpacity(0.1),
+        color: primaryColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.teal[700]!, width: 2),
+        border: Border.all(color: primaryColor, width: 2),
       ),
       child: Column(
         children: [
@@ -66,7 +67,7 @@ class SurahTitle extends StatelessWidget {
             style: GoogleFonts.scheherazadeNew(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: Colors.teal[800],
+              color: primaryColor,
             ),
           ),
           const SizedBox(height: 8),
@@ -74,7 +75,7 @@ class SurahTitle extends StatelessWidget {
             quran.getSurahNameEnglish(surahNumber),
             style: GoogleFonts.lateef(
               fontSize: 24,
-              color: Colors.teal[700],
+              color: primaryColor,
             ),
           ),
         ],
@@ -121,7 +122,7 @@ class VerseWidget extends StatelessWidget {
             '${surahNumber}:${verseNumber}',
             style: GoogleFonts.lateef(
               fontSize: 18,
-              color: Colors.teal[700],
+              color: primaryColor,
             ),
             textAlign: TextAlign.left,
           ),

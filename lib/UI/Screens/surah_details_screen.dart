@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quran_app/UI/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -51,12 +52,13 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
 
   Future<void> _bookmarkPage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    
+
     if (bookmarkedPages.contains(currentPage + 1)) {
       // Remove bookmark if already bookmarked
       bookmarkedPages.remove(currentPage + 1);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Bookmark removed from page ${currentPage + 1}')),
+        SnackBar(
+            content: Text('Bookmark removed from page ${currentPage + 1}')),
       );
     } else {
       // Add new bookmark
@@ -65,10 +67,11 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         SnackBar(content: Text('Page ${currentPage + 1} bookmarked!')),
       );
     }
-    
+
     // Save updated bookmarks
-    await prefs.setString('bookmarks_${widget.surahNumber}', jsonEncode(bookmarkedPages));
-    
+    await prefs.setString(
+        'bookmarks_${widget.surahNumber}', jsonEncode(bookmarkedPages));
+
     setState(() {});
   }
 
@@ -93,7 +96,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.teal[700],
+        backgroundColor: primaryColor,
         centerTitle: true,
         elevation: 0,
         leading: IconButton(
@@ -169,7 +172,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                                     style: TextStyle(
                                       color: isSajdah
                                           ? Colors.orange
-                                          : Colors.teal[700],
+                                          : primaryColor,
                                       fontSize: 18,
                                     ),
                                   ),
@@ -183,7 +186,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                               '${widget.surahNumber}:$verseNumber',
                               style: GoogleFonts.lateef(
                                 fontSize: 18,
-                                color: Colors.teal[700],
+                                color: primaryColor,
                               ),
                               textAlign: TextAlign.left,
                             ),
@@ -198,7 +201,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ),
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.teal[700],
+            color: primaryColor,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:quran_app/UI/Screens/chat_screen.dart';
 import 'package:quran_app/UI/Screens/prayer_screen.dart';
 import 'package:quran_app/UI/constants/constants.dart';
 import 'package:quran_app/generated/l10n.dart';
@@ -18,10 +19,10 @@ import '../../../Screens/Allah_names.dart';
 import '../../../Screens/ahadees.dart';
 import '../../../Screens/bookmark_screen.dart';
 import '../../../Screens/daily_azkar.dart';
-import '../../../Screens/extra.dart';
+
 import '../../../Screens/juzz_list.dart';
 import '../../../Screens/mp3_Screen.dart';
-import '../../../Screens/nearby_masjid.dart';
+
 import '../../../Screens/six_kalima_screen.dart';
 import '../../../Screens/surah_list.dart';
 import '../../../Screens/tasbeeh_counter.dart';
@@ -97,11 +98,11 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
         "label": localization.prayerTiming,
         "screen": PrayerScreen(),
       },
-      {
-        "imagePath": "assets/images/masjid_icon.png",
-        "label": localization.nearbyMasjid,
-        "screen": NearbyMasjidsScreen(),
-      },
+      // {
+      //   "imagePath": "assets/images/masjid_icon.png",
+      //   "label": localization.nearbyMasjid,
+      //   "screen": NearbyMasjidsScreen(),
+      // },
       {
         "imagePath": "assets/images/six_kalma_icon.png",
         "label": localization.sixKalima,
@@ -119,8 +120,8 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
       },
       {
         "imagePath": "assets/images/masjid_icon.png",
-        "label": localization.extraFeatures,
-        "screen": ExtraFeatures(),
+        "label": localization.islamicChatbot,
+        "screen": ChatScreen(),
       },
     ];
   }
@@ -128,12 +129,17 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
 
-  // TODO: replace this test ad unit with your own ad unit.
+// Real Test Ad unit for Banner Ad
+  // final adUnitId = Platform.isAndroid
+  //     ? 'ca-app-pub-6315848158314441/3815576838'
+  //     : 'ca-app-pub-3940256099942544/2934735716';
+
+// Test Ad unit for Banner Ad
   final adUnitId = Platform.isAndroid
       ? 'ca-app-pub-3940256099942544/6300978111'
-      : 'ca-app-pub-3940256099942544/2934735716';
+      : 'ca-app-pub-3940256099942544/6300978111';
 
-  /// Loads a banner ad.
+  // Loads a banner ad.
   void loadAd() {
     _bannerAd = BannerAd(
       adUnitId: adUnitId,

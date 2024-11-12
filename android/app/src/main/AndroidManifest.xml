@@ -52,9 +52,16 @@
             </intent-filter>
         </activity>
         
-        <meta-data
+ <!-- Test AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
+
+       <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-3940256099942544~3347511713"/> 
+
+  <!-- Real AdMob app ID -->
+        <!-- <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6315848158314441~2223074395"/> -->
         
         <service
             android:name="com.ryanheise.audioservice.AudioService"

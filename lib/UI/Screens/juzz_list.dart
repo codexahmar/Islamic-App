@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:quran/quran.dart' as quran;
 
 import 'package:quran_app/UI/Screens/juzz_details.dart';
+import 'package:quran_app/UI/constants/constants.dart';
 
 class JuzzListScreen extends StatefulWidget {
   const JuzzListScreen({super.key});
@@ -14,7 +15,6 @@ class JuzzListScreen extends StatefulWidget {
 class _JuzzListScreenState extends State<JuzzListScreen> {
   List<Map<String, dynamic>> juzzDetails = [];
 
-  final Color primaryColor = Color(0xFF0E7C7B); // Updated primary color
   final Color accentColor = Color(0xFFF4A261); // New accent color (orange)
   final Color backgroundColor = Color(0xFFF5F5F5); // Light grey background
 

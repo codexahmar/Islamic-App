@@ -85,7 +85,6 @@ class BackgroundService {
       channelDescription: 'Notifications for prayer times',
       importance: Importance.max,
       priority: Priority.high,
-
       playSound: true,
       sound: RawResourceAndroidNotificationSound('azaan'),
       enableVibration: true,

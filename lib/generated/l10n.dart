@@ -151,10 +151,10 @@ class S {
   }
 
   /// `Extra Features`
-  String get extraFeatures {
+  String get islamicChatbot {
     return Intl.message(
-      'Extra Features',
-      name: 'extraFeatures',
+      'Islamic Chatbot',
+      name: 'islamicChatbot',
       desc: '',
       args: [],
     );
