@@ -2,16 +2,16 @@
 An all-in-one Islamic app built with Flutter to enrich the lives of Muslims worldwide. This app offers various essential tools, resources, and content for daily use, including prayer notifications, Quran recitations, nearby masjid locator, and more.
 
 🌟 Features
-Nearby Masjid: Find mosques near your location for easy access to prayer facilities.
-MP3 Quran: Listen to recitations of the Holy Quran in MP3 format by renowned reciters.
-Prayer Timing Notifications: Get accurate prayer times and timely notifications for every Salah.
-Qibla Direction: Locate the Qibla direction from anywhere, using a built-in compass.
-Islamic Calendar: Track important Islamic dates and events based on the lunar calendar.
-Islamic Chatbot: An AI-powered chatbot to answer common questions about Islam.
-Quran Reading: Read the entire Quran in Arabic with translations in multiple languages.
-Daily Azkars: Access daily azkars for morning and evening routines to increase spirituality.
-Tasbeeh: A digital tasbeeh counter to help you with your daily dhikr and tasbeeh.
-Ahadees Collection: A wide collection of authentic ahadees to gain knowledge and wisdom.
+1) Nearby Masjid: Find mosques near your location for easy access to prayer facilities.
+2) MP3 Quran: Listen to recitations of the Holy Quran in MP3 format by renowned reciters.
+3) Prayer Timing Notifications: Get accurate prayer times and timely notifications for every Salah.
+5) Qibla Direction: Locate the Qibla direction from anywhere, using a built-in compass.
+5) Islamic Calendar: Track important Islamic dates and events based on the lunar calendar.
+7) Islamic Chatbot: An AI-powered chatbot to answer common questions about Islam.
+8) Quran Reading: Read the entire Quran in Arabic with translations in multiple languages.
+9) Daily Azkars: Access daily azkars for morning and evening routines to increase spirituality.
+10) Tasbeeh: A digital tasbeeh counter to help you with your daily dhikr and tasbeeh.
+11) Ahadees Collection: A wide collection of authentic ahadees to gain knowledge and wisdom.
 And More: Stay tuned for more features and updates!
 
 📲 Screenshots
