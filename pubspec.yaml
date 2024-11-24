@@ -48,6 +48,8 @@ dependencies:
   flutter_background_service: ^2.4.6
   flutter_background_service_android: ^3.0.3
   home_widget: ^0.6.0
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.0
   flutter_localizations:
     sdk: flutter
 

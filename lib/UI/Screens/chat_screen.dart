@@ -11,8 +11,32 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ChatService _chatService = ChatService();
   final List<ChatMessage> _messages = [];
-  bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
+
+  bool _isLoading = false;
+  bool _isListening = false;
+  // bool _isSpeaking = false;
+  String _listeningStatus = '';
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages();
+  }
+
+  Future<void> _loadMessages() async {
+    try {
+      final messages = await _chatService.loadMessages();
+      setState(() {
+        _messages.addAll(messages);
+        _isInitialized = true;
+      });
+      _scrollToBottom();
+    } catch (e) {
+      print("Load Messages Error: $e");
+    }
+  }
 
   void _sendMessage() async {
     if (_controller.text.isEmpty) return;
@@ -39,16 +63,110 @@ class _ChatScreenState extends State<ChatScreen> {
         ));
         _isLoading = false;
       });
+
+      await _chatService.saveMessages(_messages);
       _scrollToBottom();
+
+      // if (_isSpeaking) {
+      //   await _chatService.speakResponse(chatResponse);
+      // }
     } catch (e) {
       setState(() {
         _messages.add(ChatMessage(
-          text: 'Error: Unable to get response',
+          text: 'Sorry, I encountered an error. Please try again.',
           isUser: false,
         ));
         _isLoading = false;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Oops! I couldn’t process that. Please try again or ask something else.',
+            style: TextStyle(fontSize: 16),
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 4),
+        ),
+      );
     }
+  }
+
+  Future<void> _toggleListening() async {
+    if (_isListening) {
+      // Stop listening if already listening
+      await _chatService.stopListening();
+      setState(() {
+        _isListening = false;
+        _listeningStatus = '';
+      });
+      return;
+    }
+
+    // Start listening for speech
+    final bool available = await _chatService.startListening(
+      onResult: (text) {
+        setState(() {
+          _controller.text = text; // Populate the text field
+          _isListening = false;
+          _listeningStatus = '';
+        });
+      },
+      onStatus: (status) {
+        setState(() {
+          // Update UI based on the status
+          _listeningStatus = status == 'listening' ? 'Listening...' : '';
+        });
+      },
+    );
+
+    if (available) {
+      setState(() {
+        _isListening = true;
+        _listeningStatus = 'Listening...';
+      });
+    } else {
+      // Show a snackbar if speech recognition could not start
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Listening....'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  // void _toggleSpeaking() async {
+  //   setState(() => _isSpeaking = !_isSpeaking);
+  //   if (!_isSpeaking) {
+  //     await _chatService.stopSpeaking();
+  //   }
+  // }
+
+  void _clearChat() async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Clear Chat History'),
+        content: Text('Are you sure you want to clear all messages?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _chatService.clearHistory();
+              setState(() => _messages.clear());
+              Navigator.pop(context);
+            },
+            child: Text('Clear'),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+          ),
+        ],
+      ),
+    );
   }
 
   void _scrollToBottom() {
@@ -65,34 +183,82 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Islamic Chatbot',
-          style: TextStyle(fontSize: 20),
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: primaryColor,
+        elevation: 2,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: Colors.white),
+            onPressed: _clearChat,
+            tooltip: 'Clear Chat History',
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.all(16),
-              itemCount: _messages.length + (_isLoading ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == _messages.length && _isLoading) {
-                  return Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(8),
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                      ),
+          if (_listeningStatus.isNotEmpty)
+            Container(
+              color: primaryColor.withOpacity(0.2),
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                     ),
-                  );
-                }
-                return _messages[index];
-              },
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    _listeningStatus,
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: Container(
+              color: Colors.grey[50],
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: EdgeInsets.all(16),
+                itemCount: _messages.length + (_isLoading ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == _messages.length && _isLoading) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  final message = _messages[index];
+                  return _buildMessageBubble(message);
+                },
+              ),
             ),
           ),
           Container(
@@ -101,45 +267,70 @@ class _ChatScreenState extends State<ChatScreen> {
               boxShadow: [
                 BoxShadow(
                   offset: Offset(0, -2),
-                  blurRadius: 4,
-                  color: Colors.black12,
+                  blurRadius: 8,
+                  color: Colors.black26,
                 ),
               ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: 'Ask your question...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide(color: Colors.green[700]!),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        _isListening ? Icons.mic : Icons.mic_none,
+                        color: _isListening ? Colors.red : Colors.grey[600],
+                      ),
+                      onPressed: _toggleListening,
+                      tooltip: 'Voice Input',
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        style: TextStyle(fontSize: 16),
+                        decoration: InputDecoration(
+                          hintText: 'Ask your question...',
+                          hintStyle: TextStyle(color: Colors.grey[500]),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide(color: primaryColor, width: 2),
-                        ),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        onSubmitted: (text) {
+                          if (text.isNotEmpty) {
+                            _sendMessage();
+                          }
+                        },
                       ),
                     ),
-                  ),
-                  SizedBox(width: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      shape: BoxShape.circle,
+                    SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            primaryColor.withOpacity(0.8),
+                            primaryColor.withOpacity(1),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.send, color: Colors.white),
+                        onPressed: _sendMessage,
+                      ),
                     ),
-                    child: IconButton(
-                      icon: Icon(Icons.send, color: Colors.white),
-                      onPressed: _sendMessage,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -148,46 +339,54 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-}
-
-class ChatMessage extends StatelessWidget {
-  final String text;
-  final bool isUser;
-
-  const ChatMessage({
-    required this.text,
-    required this.isUser,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildMessageBubble(ChatMessage message) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 6),
       child: Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+        alignment:
+            message.isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.75,
           ),
           decoration: BoxDecoration(
-            color: isUser ? primaryColor : Colors.grey[200],
-            borderRadius: BorderRadius.circular(16),
+            gradient: message.isUser
+                ? LinearGradient(
+                    colors: [
+                      primaryColor.withOpacity(0.8),
+                      primaryColor.withOpacity(1),
+                    ],
+                  )
+                : LinearGradient(
+                    colors: [Colors.grey[300]!, Colors.grey[100]!]),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                offset: Offset(2, 3),
+                blurRadius: 5,
+              ),
+            ],
           ),
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Text(
-            text,
+            message.text,
             style: TextStyle(
-              color: isUser ? Colors.white : Colors.black87,
+              color: message.isUser ? Colors.white : Colors.black87,
+              fontSize: 15,
             ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _controller.dispose();
+    // _chatService.stopSpeaking();
+    _chatService.stopListening();
+    super.dispose();
   }
 }
