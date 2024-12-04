@@ -8,10 +8,10 @@ class AdManager {
   static InterstitialAd? _interstitialAd;
   static bool _isAdLoaded = false;
   static DateTime? _lastAdShown;
-  static const Duration _minimumDurationBetweenAds = Duration(minutes: 1);
+  static const Duration _minimumDurationBetweenAds = Duration(minutes: 20);
 
   // // Real Test ad unit IDs
-  
+
   // static final String rewardedAdUnitId = Platform.isAndroid
   //     ? 'ca-app-pub-6315848158314441/1262126766'
   //     : 'ca-app-pub-3940256099942544/1712485313';
@@ -20,7 +20,6 @@ class AdManager {
   // static final String interstitialAdUnitId = Platform.isAndroid
   //     ? 'ca-app-pub-6315848158314441/1189413490'
   //     : 'ca-app-pub-3940256099942544/4411468910';
-
 
   //  Test ad unit IDs
   static final String rewardedAdUnitId = Platform.isAndroid

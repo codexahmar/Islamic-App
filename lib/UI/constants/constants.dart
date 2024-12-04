@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 // By default color
-// Color primaryColor = Color(0xFF0E7C7B);
+Color primaryColor = Color(0xFF0E7C7B);
 
 // testing color 1
 // Color primaryColor = Color(0xFF2E8B57);
 
 // testing color 2
-Color primaryColor = Color(0xFFDAA520);
+// Color primaryColor = Color(0xFFDAA520);
 
 // testing color 3
 // Color primaryColor = Color(0xFF006400);

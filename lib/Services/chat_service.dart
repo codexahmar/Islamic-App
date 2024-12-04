@@ -27,7 +27,7 @@ class ChatMessage {
 
 class ChatService {
   final String apiKey =
-      'AIzaSyA9V50rkHxCtmsP1jyjx1MG8MjNKdq62o4'; // Replace with your API key
+      'AIzaSyA9V50rkHxCtmsP1jyjx1MG8MjNKdq62o4'; 
   static const String _storageKey = 'chat_messages';
 
   // Voice assistant components

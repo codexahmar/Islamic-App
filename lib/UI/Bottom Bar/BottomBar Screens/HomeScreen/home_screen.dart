@@ -10,6 +10,7 @@ import 'package:quran_app/UI/constants/constants.dart';
 import 'package:quran_app/generated/l10n.dart';
 import 'package:quran_app/Utils/location_util.dart';
 
+import '../../../../Services/chat_service.dart';
 import '../../../../Utils/ad_manager.dart';
 import '../../../../Utils/ad_state_mixin.dart';
 import '../../../../Utils/navigation_helper.dart';
@@ -31,6 +32,7 @@ import '../../../Widgets/feature_item_widget.dart';
 import '../../../Widgets/icon_container_widget.dart';
 import '../../../Widgets/prayer_info_widget.dart';
 import '../../../Widgets/location_widget.dart';
+import '../../../Widgets/searchbar.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
@@ -40,6 +42,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
+  final ChatService chatService = ChatService();
   late List<Map<String, dynamic>> featureItems;
   bool _isInitialized = false;
 
@@ -118,11 +121,11 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
         "label": localization.ninetyNineNames,
         "screen": AllahNames(),
       },
-      {
-        "imagePath": "assets/images/masjid_icon.png",
-        "label": localization.islamicChatbot,
-        "screen": ChatScreen(),
-      },
+      // {
+      //   "imagePath": "assets/images/masjid_icon.png",
+      //   "label": localization.islamicChatbot,
+      //   "screen": ChatScreen(),
+      // },
     ];
   }
 
@@ -303,13 +306,17 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                       )
                     : SizedBox(),
                 SizedBox(height: 15),
-                AlQuranWidget(),
+                SearchBarComponent(chatService: chatService),
+
+                // AlQuranWidget(),
                 SizedBox(height: 15),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      SizedBox(
+                        width: 10,
+                      ),
                       InkWell(
                         onTap: () {
                           NavigationHelper.pushScreen(
@@ -321,6 +328,9 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           imagePath: "assets/images/surah_icon.png",
                           label: S.of(context).surah,
                         ),
+                      ),
+                      SizedBox(
+                        width: 10,
                       ),
                       InkWell(
                         onTap: () {
@@ -334,6 +344,9 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           label: S.of(context).juzz,
                         ),
                       ),
+                      SizedBox(
+                        width: 10,
+                      ),
                       InkWell(
                         onTap: () {
                           NavigationHelper.pushScreen(
@@ -345,6 +358,9 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           imagePath: "assets/images/mp3_icon.png",
                           label: S.of(context).mp3,
                         ),
+                      ),
+                      SizedBox(
+                        width: 10,
                       ),
                       InkWell(
                         onTap: () {
@@ -396,6 +412,13 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
               ],
             ),
           ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            NavigationHelper.pushScreen(context, ChatScreen());
+          },
+          backgroundColor: primaryColor,
+          child: Icon(Icons.chat),
         ),
       ),
     );

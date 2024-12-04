@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_app/UI/constants/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../Services/chat_service.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -15,14 +16,40 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool _isLoading = false;
   bool _isListening = false;
-  // bool _isSpeaking = false;
   String _listeningStatus = '';
   bool _isInitialized = false;
+
+  // List of predefined Islamic prompts
+  List<String> _prompts = [
+    "Tell me about the Quran",
+    "What are the 99 names of Allah?",
+    "What is Zakat?",
+    "Tell me about the Prophets",
+    "What is the significance of Ramadan?",
+    "Tell me about Hajj",
+  ];
+
+  bool _showPrompts = true; // Control whether prompts are shown
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
+    _checkIfPromptsShown();
+  }
+
+  // Check if the user has already clicked on a prompt and update the state accordingly
+  Future<void> _checkIfPromptsShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _showPrompts = prefs.getBool('showPrompts') ?? true;
+    });
+  }
+
+  // Store in SharedPreferences that the user has interacted with the prompts
+  Future<void> _setPromptsShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('showPrompts', false);
   }
 
   Future<void> _loadMessages() async {
@@ -66,10 +93,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
       await _chatService.saveMessages(_messages);
       _scrollToBottom();
-
-      // if (_isSpeaking) {
-      //   await _chatService.speakResponse(chatResponse);
-      // }
     } catch (e) {
       setState(() {
         _messages.add(ChatMessage(
@@ -95,7 +118,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _toggleListening() async {
     if (_isListening) {
-      // Stop listening if already listening
       await _chatService.stopListening();
       setState(() {
         _isListening = false;
@@ -104,18 +126,16 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
 
-    // Start listening for speech
     final bool available = await _chatService.startListening(
       onResult: (text) {
         setState(() {
-          _controller.text = text; // Populate the text field
+          _controller.text = text;
           _isListening = false;
           _listeningStatus = '';
         });
       },
       onStatus: (status) {
         setState(() {
-          // Update UI based on the status
           _listeningStatus = status == 'listening' ? 'Listening...' : '';
         });
       },
@@ -127,7 +147,6 @@ class _ChatScreenState extends State<ChatScreen> {
         _listeningStatus = 'Listening...';
       });
     } else {
-      // Show a snackbar if speech recognition could not start
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Listening....'),
@@ -136,13 +155,6 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     }
   }
-
-  // void _toggleSpeaking() async {
-  //   setState(() => _isSpeaking = !_isSpeaking);
-  //   if (!_isSpeaking) {
-  //     await _chatService.stopSpeaking();
-  //   }
-  // }
 
   void _clearChat() async {
     showDialog(
@@ -181,6 +193,16 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  // Handle tap on prompt to fill text field, hide all prompts and store flag
+  void _handlePromptTap(String prompt) {
+    setState(() {
+      _controller.text = prompt;
+      _prompts.clear(); // Clear all prompts after user clicks one
+      _showPrompts = false;
+    });
+    _setPromptsShown(); // Store flag to prevent prompts on next load
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
@@ -213,6 +235,38 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
+          // Display predefined prompts as capsules if user hasn't clicked any
+          if (_showPrompts && _prompts.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _prompts.map((prompt) {
+                  return GestureDetector(
+                    onTap: () => _handlePromptTap(prompt),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: primaryColor),
+                      ),
+                      child: Text(
+                        prompt,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
           if (_listeningStatus.isNotEmpty)
             Container(
               color: primaryColor.withOpacity(0.2),
@@ -247,91 +301,58 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: EdgeInsets.all(16),
                 itemCount: _messages.length + (_isLoading ? 1 : 0),
                 itemBuilder: (context, index) {
-                  if (index == _messages.length && _isLoading) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(8),
+                  if (index == _messages.length) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
                         child: CircularProgressIndicator(),
                       ),
                     );
                   }
-                  final message = _messages[index];
-                  return _buildMessageBubble(message);
+
+                  return _buildMessageBubble(_messages[index]);
                 },
               ),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  offset: Offset(0, -2),
-                  blurRadius: 8,
-                  color: Colors.black26,
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              children: [
+                // TextField for typing messages
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      hintText: 'Type your message...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isListening ? Icons.mic : Icons.mic_none,
+                          color: primaryColor,
+                        ),
+                        onPressed: _toggleListening, // Start or stop listening
+                        tooltip: 'Start/Stop Listening',
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Send button
+                IconButton(
+                  icon: Icon(Icons.send, color: primaryColor),
+                  onPressed: _sendMessage,
+                  tooltip: 'Send Message',
                 ),
               ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        _isListening ? Icons.mic : Icons.mic_none,
-                        color: _isListening ? Colors.red : Colors.grey[600],
-                      ),
-                      onPressed: _toggleListening,
-                      tooltip: 'Voice Input',
-                    ),
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        style: TextStyle(fontSize: 16),
-                        decoration: InputDecoration(
-                          hintText: 'Ask your question...',
-                          hintStyle: TextStyle(color: Colors.grey[500]),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction: TextInputAction.newline,
-                        onSubmitted: (text) {
-                          if (text.isNotEmpty) {
-                            _sendMessage();
-                          }
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            primaryColor.withOpacity(0.8),
-                            primaryColor.withOpacity(1),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: IconButton(
-                        icon: Icon(Icons.send, color: Colors.white),
-                        onPressed: _sendMessage,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ),
         ],
@@ -340,53 +361,23 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6),
-      child: Align(
-        alignment:
-            message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.75,
-          ),
-          decoration: BoxDecoration(
-            gradient: message.isUser
-                ? LinearGradient(
-                    colors: [
-                      primaryColor.withOpacity(0.8),
-                      primaryColor.withOpacity(1),
-                    ],
-                  )
-                : LinearGradient(
-                    colors: [Colors.grey[300]!, Colors.grey[100]!]),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                offset: Offset(2, 3),
-                blurRadius: 5,
-              ),
-            ],
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Text(
-            message.text,
-            style: TextStyle(
-              color: message.isUser ? Colors.white : Colors.black87,
-              fontSize: 15,
-            ),
+    return Align(
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        padding: EdgeInsets.all(10),
+        margin: EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: message.isUser ? primaryColor : Colors.grey[300],
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          message.text,
+          style: TextStyle(
+            color: message.isUser ? Colors.white : Colors.black,
+            fontSize: 16,
           ),
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _controller.dispose();
-    // _chatService.stopSpeaking();
-    _chatService.stopListening();
-    super.dispose();
   }
 }
