@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:quran_app/UI/constants/constants.dart';
 import '../../Services/chat_service.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/chat_service_provider.dart';
 
 class ChatDialog extends StatefulWidget {
-  final ChatService chatService;
   final String initialQuery;
 
   const ChatDialog({
     Key? key,
-    required this.chatService,
     required this.initialQuery,
   }) : super(key: key);
 
@@ -21,10 +22,13 @@ class _ChatDialogState extends State<ChatDialog> {
   final TextEditingController _controller = TextEditingController();
   bool _isLoading = false;
   bool _isListening = false;
+  late ChatService chatService;
 
   @override
   void initState() {
     super.initState();
+    chatService =
+        Provider.of<ChatServiceProvider>(context, listen: false).chatService;
     _sendQuery(widget.initialQuery);
   }
 
@@ -35,7 +39,7 @@ class _ChatDialogState extends State<ChatDialog> {
     });
 
     try {
-      final response = await widget.chatService.getChatResponse(query);
+      final response = await chatService.getChatResponse(query);
       setState(() {
         _messages.add(ChatMessage(text: response, isUser: false));
       });
@@ -61,7 +65,7 @@ class _ChatDialogState extends State<ChatDialog> {
 
   // Function for voice input
   Future<void> _handleVoiceSearch() async {
-    final hasPermission = await widget.chatService.checkMicrophonePermission();
+    final hasPermission = await chatService.checkMicrophonePermission();
     if (!hasPermission) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Microphone permission required!")),
@@ -69,16 +73,16 @@ class _ChatDialogState extends State<ChatDialog> {
       return;
     }
 
-    final result = await widget.chatService.startListening(
+    final result = await chatService.startListening(
       onResult: (text) {
         setState(() {
           _controller.text = text;
         });
-        _handleSend(); // Automatically send the message after voice input
+        _handleSend();
       },
       onStatus: (status) {
         if (status == 'done') {
-          widget.chatService.stopListening();
+          chatService.stopListening();
         }
       },
     );
@@ -95,14 +99,12 @@ class _ChatDialogState extends State<ChatDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding:
-            const EdgeInsets.all(16.0), // Add padding around the entire dialog
+        padding: const EdgeInsets.all(16.0),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.85, // Adjust size
-          height: MediaQuery.of(context).size.height * 0.6, // Adjust size
+          width: MediaQuery.of(context).size.width * 0.85,
+          height: MediaQuery.of(context).size.height * 0.6,
           child: Column(
             children: [
-              // Chat messages
               Expanded(
                 child: ListView.builder(
                   itemCount: _messages.length,
@@ -137,19 +139,16 @@ class _ChatDialogState extends State<ChatDialog> {
                   },
                 ),
               ),
-              // Loading indicator
               if (_isLoading)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                   child: CircularProgressIndicator(),
                 ),
-              // Input field and voice button
               SizedBox(
                 height: 10,
               ),
               Row(
                 children: [
-                  // TextField for typing messages
                   Expanded(
                     child: TextField(
                       controller: _controller,
@@ -169,15 +168,12 @@ class _ChatDialogState extends State<ChatDialog> {
                             _isListening ? Icons.mic : Icons.mic_none,
                             color: primaryColor,
                           ),
-                          onPressed:
-                              _handleVoiceSearch, // Start or stop listening
+                          onPressed: _handleVoiceSearch,
                           tooltip: 'Start/Stop Listening',
                         ),
                       ),
                     ),
                   ),
-
-                  // Send button
                   IconButton(
                     icon: Icon(Icons.send, color: primaryColor),
                     onPressed: _handleSend,

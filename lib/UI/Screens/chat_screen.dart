@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:quran_app/UI/constants/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import '../../Services/chat_service.dart';
+import '../../providers/chat_service_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -10,7 +12,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
-  final ChatService _chatService = ChatService();
+  late ChatService _chatService;
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
 
@@ -34,6 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _chatService = Provider.of<ChatServiceProvider>(context, listen: false).chatService;
     _loadMessages();
     _checkIfPromptsShown();
   }

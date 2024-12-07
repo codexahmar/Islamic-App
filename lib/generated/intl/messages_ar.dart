@@ -40,7 +40,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "asr": MessageLookupByLibrary.simpleMessage("العصر"),
         "betterUXExperience":
             MessageLookupByLibrary.simpleMessage("تجربة مستخدم أفضل"),
-        "bookmark": MessageLookupByLibrary.simpleMessage("إشارة مرجعية"),
         "bookmarkPage":
             MessageLookupByLibrary.simpleMessage("إضافة إشارة مرجعية"),
         "bookmarksTitle":
@@ -52,13 +51,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("خطأ"),
         "errorFetchingPrayerTimes":
             MessageLookupByLibrary.simpleMessage("خطأ في جلب مواقيت الصلاة"),
-        "extraFeatures": MessageLookupByLibrary.simpleMessage("ميزات إضافية"),
         "fajr": MessageLookupByLibrary.simpleMessage("الفجر"),
         "fetchingLocation":
             MessageLookupByLibrary.simpleMessage("جارٍ جلب الموقع..."),
         "fortyRabana": MessageLookupByLibrary.simpleMessage("40 ربنا"),
         "home": MessageLookupByLibrary.simpleMessage("الرئيسية"),
         "isha": MessageLookupByLibrary.simpleMessage("العشاء"),
+        "islamicChatbot":
+            MessageLookupByLibrary.simpleMessage("بوت محادثة إسلامي"),
         "juzz": MessageLookupByLibrary.simpleMessage("جزء"),
         "languageSelection":
             MessageLookupByLibrary.simpleMessage("اختيار اللغة"),
@@ -92,6 +92,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "هل أنت متأكد أنك تريد إزالة هذه الإشارة المرجعية؟"),
         "removeBookmarkTitle":
             MessageLookupByLibrary.simpleMessage("إزالة الإشارة المرجعية"),
+        "saved": MessageLookupByLibrary.simpleMessage("تم الحفظ"),
         "search": MessageLookupByLibrary.simpleMessage("بحث"),
         "sectionSubtitle":
             MessageLookupByLibrary.simpleMessage("استمع وتعلم أسماء الله"),

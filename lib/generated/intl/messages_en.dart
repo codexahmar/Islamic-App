@@ -39,7 +39,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "asr": MessageLookupByLibrary.simpleMessage("Asr"),
         "betterUXExperience":
             MessageLookupByLibrary.simpleMessage("Better UX Experience"),
-        "bookmark": MessageLookupByLibrary.simpleMessage("Bookmark"),
         "bookmarkPage": MessageLookupByLibrary.simpleMessage("Bookmark Page"),
         "bookmarksTitle": MessageLookupByLibrary.simpleMessage("Bookmarks"),
         "calendar": MessageLookupByLibrary.simpleMessage("Calendar"),
@@ -49,13 +48,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("Error"),
         "errorFetchingPrayerTimes":
             MessageLookupByLibrary.simpleMessage("Error fetching prayer times"),
-        "extraFeatures": MessageLookupByLibrary.simpleMessage("Extra Features"),
         "fajr": MessageLookupByLibrary.simpleMessage("Fajr"),
         "fetchingLocation":
             MessageLookupByLibrary.simpleMessage("Fetching location..."),
         "fortyRabana": MessageLookupByLibrary.simpleMessage("40 Rabbana"),
         "home": MessageLookupByLibrary.simpleMessage("Home"),
         "isha": MessageLookupByLibrary.simpleMessage("Isha"),
+        "islamicChatbot":
+            MessageLookupByLibrary.simpleMessage("Islamic Chatbot"),
         "juzz": MessageLookupByLibrary.simpleMessage("Juzz"),
         "languageSelection":
             MessageLookupByLibrary.simpleMessage("Language Selection"),
@@ -89,6 +89,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure you want to remove this bookmark?"),
         "removeBookmarkTitle":
             MessageLookupByLibrary.simpleMessage("Remove Bookmark"),
+        "saved": MessageLookupByLibrary.simpleMessage("Saved"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "sectionSubtitle": MessageLookupByLibrary.simpleMessage(
             "Listen and learn Allah names"),

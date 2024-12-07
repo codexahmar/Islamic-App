@@ -150,7 +150,7 @@ class S {
     );
   }
 
-  /// `Extra Features`
+  /// `Islamic Chatbot`
   String get islamicChatbot {
     return Intl.message(
       'Islamic Chatbot',
@@ -200,11 +200,11 @@ class S {
     );
   }
 
-  /// `Bookmark`
-  String get bookmark {
+  /// `Saved`
+  String get saved {
     return Intl.message(
-      'Bookmark',
-      name: 'bookmark',
+      'Saved',
+      name: 'saved',
       desc: '',
       args: [],
     );

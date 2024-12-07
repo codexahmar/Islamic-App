@@ -4,14 +4,20 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:quran_app/providers/alarm_provider.dart';
+import 'package:quran_app/services/rating_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+import 'UI/Widgets/rating_dialog.dart';
 import 'Utils/prayer_times_manager.dart';
 import 'generated/l10n.dart';
-import 'UI/Screens/splash_screen.dart';
+
 import 'providers/location_provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'providers/chat_service_provider.dart';
+import 'splash_screen.dart';
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -20,13 +26,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MobileAds.instance.initialize();
 
-  tz.initializeTimeZones();
+  await Permission.microphone.request();
 
-  // Initialize flutter_local_notifications
-  // flutterLocalNotificationsPlugin
-  //     .resolvePlatformSpecificImplementation<
-  //         AndroidFlutterLocalNotificationsPlugin>()
-  //     ?.requestNotificationsPermission();
+  tz.initializeTimeZones();
 
   final prefs = await SharedPreferences.getInstance();
   final String? languageCode = prefs.getString('languageCode');
@@ -43,6 +45,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => LocationProvider()),
         ChangeNotifierProvider(create: (_) => PrayerTimeManager()),
         ChangeNotifierProvider(create: (_) => alarmprovider()),
+        ChangeNotifierProvider(create: (_) => ChatServiceProvider()),
       ],
       child: MyApp(
         initialLocale:
@@ -107,6 +110,25 @@ class _MyAppState extends State<MyApp> {
       ],
       supportedLocales: S.delegate.supportedLocales,
       locale: _locale,
+      builder: (context, child) {
+        return WillPopScope(
+          onWillPop: () async {
+            if (Navigator.of(context).canPop()) {
+              return true;
+            }
+            final hasRated = await RatingService.hasUserRated();
+            if (!hasRated) {
+              final shouldExit = await showDialog<bool>(
+                context: context,
+                builder: (context) => const AppRatingDialog(),
+              );
+              return shouldExit ?? false;
+            }
+            return true;
+          },
+          child: child!,
+        );
+      },
       home: const SplashScreen(),
     );
   }

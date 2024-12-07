@@ -41,7 +41,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "asr": MessageLookupByLibrary.simpleMessage("İkindi"),
         "betterUXExperience":
             MessageLookupByLibrary.simpleMessage("Daha İyi Kullanıcı Deneyimi"),
-        "bookmark": MessageLookupByLibrary.simpleMessage("Yer İmi"),
         "bookmarkPage": MessageLookupByLibrary.simpleMessage(
             "Sayfayı Yer İşaretlerine Ekle"),
         "bookmarksTitle":
@@ -53,14 +52,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("Hata"),
         "errorFetchingPrayerTimes": MessageLookupByLibrary.simpleMessage(
             "Namaz vakitleri alınırken hata oluştu"),
-        "extraFeatures":
-            MessageLookupByLibrary.simpleMessage("Ekstra Özellikler"),
         "fajr": MessageLookupByLibrary.simpleMessage("İmsak"),
         "fetchingLocation":
             MessageLookupByLibrary.simpleMessage("Konum alınıyor..."),
         "fortyRabana": MessageLookupByLibrary.simpleMessage("40 Rabbana"),
         "home": MessageLookupByLibrary.simpleMessage("Ana Sayfa"),
         "isha": MessageLookupByLibrary.simpleMessage("Yatsı"),
+        "islamicChatbot":
+            MessageLookupByLibrary.simpleMessage("İslami Sohbet Botu"),
         "juzz": MessageLookupByLibrary.simpleMessage("Cüz"),
         "languageSelection": MessageLookupByLibrary.simpleMessage("Dil Seçimi"),
         "loading": MessageLookupByLibrary.simpleMessage("Yükleniyor..."),
@@ -95,6 +94,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bu yer işaretini kaldırmak istediğinize emin misiniz?"),
         "removeBookmarkTitle":
             MessageLookupByLibrary.simpleMessage("Yer İşaretini Kaldır"),
+        "saved": MessageLookupByLibrary.simpleMessage("kaydedildi"),
         "search": MessageLookupByLibrary.simpleMessage("Ara"),
         "sectionSubtitle": MessageLookupByLibrary.simpleMessage(
             "Allah\'ın isimlerini dinleyin ve öğrenin"),

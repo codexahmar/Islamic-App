@@ -15,6 +15,8 @@ import '../../../../Utils/ad_manager.dart';
 import '../../../../Utils/ad_state_mixin.dart';
 import '../../../../Utils/navigation_helper.dart';
 import '../../../../Utils/prayer_times_manager.dart';
+import '../../../../providers/chat_service_provider.dart';
+import '../../../../services/rating_service.dart';
 import '../../../Screens/40_rabana.dart';
 import '../../../Screens/Allah_names.dart';
 import '../../../Screens/ahadees.dart';
@@ -24,15 +26,17 @@ import '../../../Screens/daily_azkar.dart';
 import '../../../Screens/juzz_list.dart';
 import '../../../Screens/mp3_Screen.dart';
 
+// import '../../../Screens/nearby_masjid.dart';
 import '../../../Screens/six_kalima_screen.dart';
 import '../../../Screens/surah_list.dart';
 import '../../../Screens/tasbeeh_counter.dart';
-import '../../../Widgets/al_quran_widget.dart';
+// import '../../../Widgets/al_quran_widget.dart';
 import '../../../Widgets/feature_item_widget.dart';
 import '../../../Widgets/icon_container_widget.dart';
 import '../../../Widgets/prayer_info_widget.dart';
 import '../../../Widgets/location_widget.dart';
 import '../../../Widgets/searchbar.dart';
+import '../../../Widgets/rating_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
@@ -42,15 +46,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
-  final ChatService chatService = ChatService();
+  late ChatService chatService;
   late List<Map<String, dynamic>> featureItems;
   bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
+    chatService =
+        Provider.of<ChatServiceProvider>(context, listen: false).chatService;
     _initializeData();
     loadAd();
+    _initializeRating();
   }
 
   Future<void> _initializeData() async {
@@ -72,6 +79,28 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
     }
   }
 
+  Future<void> _initializeRating() async {
+    await RatingService.initializeFirstOpen();
+    // Add a delay before checking rating
+    Future.delayed(Duration(minutes: 5), () {
+      if (mounted) {
+        _checkRating();
+      }
+    });
+  }
+
+  Future<void> _checkRating() async {
+    if (await RatingService.shouldShowRating()) {
+      await RatingService.updateLastPromptDate();
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => const AppRatingDialog(),
+        );
+      }
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -79,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
   }
 
   void _initializeFeatureItems() {
-    final localization = S.of(context); // Access localization here
+    final localization = S.of(context);
     featureItems = [
       {
         "imagePath": "assets/images/tasbeeh_icon.png",
@@ -149,17 +178,15 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
-        // Called when an ad is successfully received.
         onAdLoaded: (ad) {
           debugPrint('$ad loaded.');
           setState(() {
             _isLoaded = true;
           });
         },
-        // Called when an ad request failed.
         onAdFailedToLoad: (ad, err) {
           debugPrint('BannerAd failed to load: $err');
-          // Dispose the ad here to free resources.
+
           ad.dispose();
         },
       ),
@@ -182,19 +209,28 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
     final prayerTimeManager = Provider.of<PrayerTimeManager>(context);
     return WillPopScope(
       onWillPop: () async {
-        // Show custom confirmation dialog
+        final hasRated = await RatingService.hasUserRated();
+        if (!hasRated) {
+          final shouldExit = await showDialog<bool>(
+            context: context,
+            builder: (context) => const AppRatingDialog(),
+          );
+          if (shouldExit == null || !shouldExit) {
+            return false;
+          }
+        }
+
         final shouldClose = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  15.0), // Add this line for rounded corners
+              borderRadius: BorderRadius.circular(15.0),
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/images/app_logo.png', // Replace with your app logo path
+                  'assets/images/app_logo.png',
                   width: 80,
                   height: 80,
                 ),
@@ -210,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
               ],
             ),
             actions: [
-              SizedBox(height: 20), // Add spacing above the buttons
+              SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
@@ -221,8 +257,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           backgroundColor: primaryColor,
                           padding: EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                15.0), // Add rounded corners to the button
+                            borderRadius: BorderRadius.circular(15.0),
                           ),
                         ),
                         onPressed: () => Navigator.of(context).pop(false),
@@ -241,8 +276,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           backgroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                15.0), // Add rounded corners to the button
+                            borderRadius: BorderRadius.circular(15.0),
                           ),
                         ),
                         onPressed: () => Navigator.of(context).pop(true),
@@ -255,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 20), // Add spacing below the buttons
+              SizedBox(height: 20),
             ],
           ),
         );
@@ -306,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                       )
                     : SizedBox(),
                 SizedBox(height: 15),
-                SearchBarComponent(chatService: chatService),
+                SearchBarComponent(),
 
                 // AlQuranWidget(),
                 SizedBox(height: 15),
@@ -314,9 +348,6 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      SizedBox(
-                        width: 10,
-                      ),
                       InkWell(
                         onTap: () {
                           NavigationHelper.pushScreen(
@@ -328,9 +359,6 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           imagePath: "assets/images/surah_icon.png",
                           label: S.of(context).surah,
                         ),
-                      ),
-                      SizedBox(
-                        width: 10,
                       ),
                       InkWell(
                         onTap: () {
@@ -344,9 +372,6 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           label: S.of(context).juzz,
                         ),
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
                       InkWell(
                         onTap: () {
                           NavigationHelper.pushScreen(
@@ -359,9 +384,6 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           label: S.of(context).mp3,
                         ),
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
                       InkWell(
                         onTap: () {
                           NavigationHelper.pushScreen(
@@ -371,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                         },
                         child: IconContainerWidget(
                           imagePath: "assets/images/bookmark_icon.png",
-                          label: S.of(context).bookmark,
+                          label: S.of(context).saved,
                         ),
                       ),
                     ],

@@ -1,27 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../Services/chat_service.dart';
-import '../Screens/chatdialog.dart';
+import '../../providers/chat_service_provider.dart';
+import 'chatdialog.dart';
 
 class SearchBarComponent extends StatefulWidget {
-  final ChatService chatService;
-
-  const SearchBarComponent({Key? key, required this.chatService})
-      : super(key: key);
+  const SearchBarComponent({Key? key}) : super(key: key);
 
   @override
   _SearchBarComponentState createState() => _SearchBarComponentState();
 }
 
 class _SearchBarComponentState extends State<SearchBarComponent> {
+  late ChatService chatService;
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode(); // FocusNode to manage focus
+  final FocusNode _focusNode = FocusNode(); 
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    chatService = Provider.of<ChatServiceProvider>(context, listen: false).chatService;
+  }
 
   void _openChatDialog(String query) {
     showDialog(
       context: context,
       builder: (context) => ChatDialog(
-        chatService: widget.chatService,
         initialQuery: query,
       ),
     );
@@ -31,7 +36,7 @@ class _SearchBarComponentState extends State<SearchBarComponent> {
     final query = _controller.text.trim();
     if (query.isNotEmpty) {
       _openChatDialog(query);
-      _controller.clear(); // Clear the text field after search
+      _controller.clear(); 
     }
   }
 
@@ -39,9 +44,10 @@ class _SearchBarComponentState extends State<SearchBarComponent> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Remove focus from the TextField when tapping outside
+
+        
         FocusScope.of(context)
-            .requestFocus(FocusNode()); // This removes the cursor
+            .requestFocus(FocusNode()); 
       },
       child: Container(
         height: 50,
@@ -62,7 +68,7 @@ class _SearchBarComponentState extends State<SearchBarComponent> {
             Expanded(
               child: TextField(
                 controller: _controller,
-                focusNode: _focusNode, // Attach FocusNode to TextField
+                focusNode: _focusNode, 
                 decoration: const InputDecoration(
                   hintText: "Ask anything from Islamic Chatbot",
                   border: InputBorder.none,

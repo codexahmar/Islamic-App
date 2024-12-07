@@ -39,7 +39,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "asr": MessageLookupByLibrary.simpleMessage("عصر"),
         "betterUXExperience":
             MessageLookupByLibrary.simpleMessage("بہتر یو ایکس تجربہ"),
-        "bookmark": MessageLookupByLibrary.simpleMessage("بک مارک"),
         "bookmarkPage":
             MessageLookupByLibrary.simpleMessage("صفحہ بک مارک کریں"),
         "bookmarksTitle": MessageLookupByLibrary.simpleMessage("بک مارکس"),
@@ -50,13 +49,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("غلطی"),
         "errorFetchingPrayerTimes":
             MessageLookupByLibrary.simpleMessage("نماز کے اوقات لاتے وقت غلطی"),
-        "extraFeatures": MessageLookupByLibrary.simpleMessage("اضافی خصوصیات"),
         "fajr": MessageLookupByLibrary.simpleMessage("فجر"),
         "fetchingLocation":
             MessageLookupByLibrary.simpleMessage("مقام حاصل کیا جا رہا ہے..."),
         "fortyRabana": MessageLookupByLibrary.simpleMessage("40 ربنا"),
         "home": MessageLookupByLibrary.simpleMessage("ہوم"),
         "isha": MessageLookupByLibrary.simpleMessage("عشاء"),
+        "islamicChatbot":
+            MessageLookupByLibrary.simpleMessage("اسلامی چیٹ بوٹ"),
         "juzz": MessageLookupByLibrary.simpleMessage("جز"),
         "languageSelection":
             MessageLookupByLibrary.simpleMessage("زبان کا انتخاب"),
@@ -91,6 +91,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "کیا آپ واقعی اس بک مارک کو ہٹانا چاہتے ہیں؟"),
         "removeBookmarkTitle":
             MessageLookupByLibrary.simpleMessage("بک مارک ہٹائیں"),
+        "saved": MessageLookupByLibrary.simpleMessage("محفوظ"),
         "search": MessageLookupByLibrary.simpleMessage("تلاش"),
         "sectionSubtitle":
             MessageLookupByLibrary.simpleMessage("اللہ کے نام سنیں اور سیکھیں"),

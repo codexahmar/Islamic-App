@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToNextScreen() {
-    Timer(const Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 4), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => BottomNavbar()),
@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Center(
         child: Image.asset(
-          'assets/images/splash_screen.jpg',
+          'assets/images/splash_screen.gif',
           width: double.infinity,
           height: double.infinity,
           fit: BoxFit.cover,
