@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../constants/constants.dart';
-
 class PrayerInfoWidget extends StatelessWidget {
   final String prayerName;
   final String prayerTime;
@@ -17,48 +15,57 @@ class PrayerInfoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
       margin: EdgeInsets.all(5),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      height: 150,
+      width: double.infinity,
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                filterQuality: FilterQuality.high,
+                fit: BoxFit.cover,
+                image: AssetImage("assets/images/mosque.png"),
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            height: double.infinity,
+            width: double.infinity,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  prayerName,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        prayerName,
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        prayerTime,
+                        style: TextStyle(
+                            fontSize: 28,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(height: 15),
+                      Text(
+                        nextPrayer,
+                        style: TextStyle(color: Colors.yellow, fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(height: 10),
-                Text(
-                  prayerTime,
-                  style: TextStyle(
-                      fontSize: 24,
-                      color: primaryColor,
-                      fontWeight: FontWeight.w600),
-                ),
-                SizedBox(height: 10),
-                Text(nextPrayer),
               ],
             ),
-            Image.asset(
-              "assets/images/masjid_image.png",
-              height: 80,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

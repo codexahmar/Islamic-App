@@ -6,6 +6,12 @@ import '../../Services/chat_service.dart';
 import '../../providers/chat_service_provider.dart';
 
 class ChatScreen extends StatefulWidget {
+  final String? initialQuery;
+  final String? selectedLanguage;
+
+  const ChatScreen({Key? key, this.initialQuery, this.selectedLanguage})
+      : super(key: key);
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -36,9 +42,53 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _chatService = Provider.of<ChatServiceProvider>(context, listen: false).chatService;
-    _loadMessages();
+    _chatService =
+        Provider.of<ChatServiceProvider>(context, listen: false).chatService;
+
+    // First load existing messages
+    _loadMessages().then((_) {
+      // Then handle initial query if provided
+      if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+        _handleInitialQuery();
+      }
+    });
+
     _checkIfPromptsShown();
+  }
+
+  Future<void> _handleInitialQuery() async {
+    final userMessage = widget.initialQuery!;
+    setState(() {
+      _messages.add(ChatMessage(
+        text: userMessage,
+        isUser: true,
+      ));
+    });
+
+    setState(() => _isLoading = true);
+    try {
+      final chatResponse = await _chatService.getChatResponse(
+          userMessage, widget.selectedLanguage!);
+      setState(() {
+        _messages.add(ChatMessage(
+          text: chatResponse,
+          isUser: false,
+        ));
+        _isLoading = false;
+      });
+
+      // Save all messages including the new ones
+      await _chatService.saveMessages(_messages);
+      _scrollToBottom();
+    } catch (e) {
+      setState(() {
+        _messages.add(ChatMessage(
+          text: 'Sorry, I encountered an error. Please try again.',
+          isUser: false,
+        ));
+        _isLoading = false;
+      });
+    }
   }
 
   // Check if the user has already clicked on a prompt and update the state accordingly
@@ -85,7 +135,8 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollToBottom();
 
     try {
-      final chatResponse = await _chatService.getChatResponse(userMessage);
+      final chatResponse = await _chatService.getChatResponse(
+          userMessage, widget.selectedLanguage!);
       setState(() {
         _messages.add(ChatMessage(
           text: chatResponse,
@@ -218,6 +269,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           'Islamic Chatbot',
           style: TextStyle(

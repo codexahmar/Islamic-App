@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_app/UI/constants/constants.dart';
 
 class IconContainerWidget extends StatelessWidget {
   final String imagePath;
@@ -32,7 +33,11 @@ class IconContainerWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         child: Column(
           children: [
-            Image.asset(imagePath, height: 40),
+            Image.asset(
+              imagePath,
+              height: 40,
+              color: primaryColor,
+            ),
             const SizedBox(height: 5),
             Text(
               label,

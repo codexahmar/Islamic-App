@@ -6,6 +6,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:quran_app/UI/Screens/chat_screen.dart';
 import 'package:quran_app/UI/Screens/prayer_screen.dart';
+import 'package:quran_app/UI/Widgets/searchbar.dart';
 import 'package:quran_app/UI/constants/constants.dart';
 import 'package:quran_app/generated/l10n.dart';
 import 'package:quran_app/Utils/location_util.dart';
@@ -15,7 +16,6 @@ import '../../../../Utils/ad_manager.dart';
 import '../../../../Utils/ad_state_mixin.dart';
 import '../../../../Utils/navigation_helper.dart';
 import '../../../../Utils/prayer_times_manager.dart';
-import '../../../../providers/chat_service_provider.dart';
 import '../../../../services/rating_service.dart';
 import '../../../Screens/40_rabana.dart';
 import '../../../Screens/Allah_names.dart';
@@ -35,7 +35,6 @@ import '../../../Widgets/feature_item_widget.dart';
 import '../../../Widgets/icon_container_widget.dart';
 import '../../../Widgets/prayer_info_widget.dart';
 import '../../../Widgets/location_widget.dart';
-import '../../../Widgets/searchbar.dart';
 import '../../../Widgets/rating_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -53,8 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    chatService =
-        Provider.of<ChatServiceProvider>(context, listen: false).chatService;
+
     _initializeData();
     loadAd();
     _initializeRating();
@@ -150,11 +148,11 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
         "label": localization.ninetyNineNames,
         "screen": AllahNames(),
       },
-      // {
-      //   "imagePath": "assets/images/masjid_icon.png",
-      //   "label": localization.islamicChatbot,
-      //   "screen": ChatScreen(),
-      // },
+      {
+        "imagePath": "assets/images/masjid_icon.png",
+        "label": localization.islamicChatbot,
+        "screen": ChatScreen(),
+      },
     ];
   }
 
@@ -340,7 +338,91 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                       )
                     : SizedBox(),
                 SizedBox(height: 15),
-                SearchBarComponent(),
+                // SearchBarComponent(),
+                InkWell(
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SearchBarScreen())),
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Image.asset(
+                            "assets/images/ai-search.png",
+                            height: 25,
+                          ),
+                          onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const SearchBarScreen())),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            decoration: const InputDecoration(
+                              hintText: "Ask anything",
+                              hintStyle: TextStyle(color: Color(0xFF12755F)),
+                              border: InputBorder.none,
+                            ),
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const SearchBarScreen())),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: primaryColor),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: RichText(
+                            text: TextSpan(
+                              text: 'Islamic ',
+                              style: TextStyle(
+                                  color: primaryColor,
+                                  fontFamily: 'NotoSans',
+                                  fontWeight: FontWeight.w600),
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: 'AI',
+                                  style: TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Image.asset(
+                            "assets/images/mic.png",
+                            height: 25,
+                          ),
+                          onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const SearchBarScreen())),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
                 // AlQuranWidget(),
                 SizedBox(height: 15),
@@ -356,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                           );
                         },
                         child: IconContainerWidget(
-                          imagePath: "assets/images/surah_icon.png",
+                          imagePath: "assets/images/Vector.png",
                           label: S.of(context).surah,
                         ),
                       ),
@@ -435,13 +517,13 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            NavigationHelper.pushScreen(context, ChatScreen());
-          },
-          backgroundColor: primaryColor,
-          child: Icon(Icons.chat),
-        ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {
+        //     NavigationHelper.pushScreen(context, ChatScreen());
+        //   },
+        //   backgroundColor: primaryColor,
+        //   child: Icon(Icons.chat),
+        // ),
       ),
     );
   }

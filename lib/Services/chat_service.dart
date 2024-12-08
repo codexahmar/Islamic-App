@@ -175,19 +175,13 @@ class ChatService {
   // }
 
   // Get chat response from API
-  Future<String> getChatResponse(String userMessage) async {
+  Future<String> getChatResponse(String userMessage, String language) async {
     final url = Uri.parse(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey');
 
     final systemPrompt =
         """You are an Islamic AI assistant designed to answer questions about Islam, 
-    Islamic history, Quran, Hadith, and Islamic practices. If the user's question is in Roman Urdu or Urdu, 
-    respond in the same language. If the question is in English, respond in English. Ensure that all answers are 
-    respectful, authentic, and supported by reliable Islamic sources such as the Quran, Sahih Hadith, and scholarly consensus. 
-    Handle critical and sensitive topics, such as marital issues or personal affairs, with empathy and authenticity, citing 
-    appropriate Islamic principles. If a question is inappropriate or non-Islamic, politely redirect the conversation 
-    to Islamic topics while maintaining respect.
-
+    Islamic history, Quran, Hadith, and Islamic practices. Respond in $language. 
     User Question: $userMessage""";
 
     final requestBody = {
