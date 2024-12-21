@@ -67,136 +67,140 @@ class _SearchBarScreenState extends State<SearchBarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Search Bar
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search Bar
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Image.asset(
+                        "assets/images/ai-search.png",
+                        color: primaryColor,
+                        height: 25,
+                      ),
+                      onPressed: _handleSearch,
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: const InputDecoration(
+                          hintText: "Ask anything",
+                          hintStyle: TextStyle(color: Color(0xFF12755F)),
+                          border: InputBorder.none,
+                        ),
+                        onSubmitted: (_) => _handleSearch(),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: primaryColor),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'Islamic ',
+                          style: TextStyle(
+                              color: primaryColor,
+                              fontFamily: 'NotoSans',
+                              fontWeight: FontWeight.w600),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: 'AI',
+                              style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Image.asset(
+                        "assets/images/mic.png",
+                        color: primaryColor,
+                        height: 25,
+                      ),
+                      onPressed: _toggleListening,
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
+
+              // Instructions
+              const SizedBox(height: 32),
+              Text(
+                "How to use:",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              _buildInstructionItem(
+                context,
+                icon: Icons.keyboard,
+                title: "Type your question",
+                description:
+                    "Enter any Islamic topic or question you'd like to learn about",
+              ),
+              _buildInstructionItem(
+                context,
+                icon: Icons.mic,
+                title: "Voice Search",
+                description:
+                    "Tap the microphone icon and speak your question clearly",
+              ),
+              _buildInstructionItem(
+                context,
+                icon: Icons.search,
+                title: "Search",
+                description:
+                    "Tap the search icon or press enter to get your answer",
+              ),
+
+              // Language Selection Instructions
+              const SizedBox(height: 32),
+              Text(
+                "Select Language:",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Choose a language to receive responses:",
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  IconButton(
-                    icon: Image.asset(
-                      "assets/images/ai-search.png",
-                      height: 25,
-                    ),
-                    onPressed: _handleSearch,
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                        hintText: "Ask anything",
-                        hintStyle: TextStyle(color: Color(0xFF12755F)),
-                        border: InputBorder.none,
-                      ),
-                      onSubmitted: (_) => _handleSearch(),
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: primaryColor),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: RichText(
-                      text: TextSpan(
-                        text: 'Islamic ',
-                        style: TextStyle(
-                            color: primaryColor,
-                            fontFamily: 'NotoSans',
-                            fontWeight: FontWeight.w600),
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: 'AI',
-                            style: TextStyle(
-                                color: primaryColor,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Image.asset(
-                      "assets/images/mic.png",
-                      height: 25,
-                    ),
-                    onPressed: _toggleListening,
-                  ),
+                  _buildLanguageButton("Urdu"),
+                  _buildLanguageButton("English"),
+                  _buildLanguageButton("Arabic"),
+                  _buildLanguageButton("Turkish"),
+                  _buildLanguageButton("Hindi"),
                 ],
               ),
-            ),
-
-            // Instructions
-            const SizedBox(height: 32),
-            Text(
-              "How to use:",
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            _buildInstructionItem(
-              context,
-              icon: Icons.keyboard,
-              title: "Type your question",
-              description:
-                  "Enter any Islamic topic or question you'd like to learn about",
-            ),
-            _buildInstructionItem(
-              context,
-              icon: Icons.mic,
-              title: "Voice Search",
-              description:
-                  "Tap the microphone icon and speak your question clearly",
-            ),
-            _buildInstructionItem(
-              context,
-              icon: Icons.search,
-              title: "Search",
-              description:
-                  "Tap the search icon or press enter to get your answer",
-            ),
-
-            // Language Selection Instructions
-            const SizedBox(height: 32),
-            Text(
-              "Select Language:",
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Choose a language to receive responses:",
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildLanguageButton("Urdu"),
-                _buildLanguageButton("English"),
-                _buildLanguageButton("Arabic"),
-                _buildLanguageButton("Turkish"),
-                _buildLanguageButton("Hindi"),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

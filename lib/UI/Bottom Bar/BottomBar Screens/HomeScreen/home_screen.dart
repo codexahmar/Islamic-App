@@ -341,9 +341,10 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                 // SearchBarComponent(),
                 InkWell(
                   onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SearchBarScreen())),
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SearchBarScreen()),
+                  ),
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
@@ -362,30 +363,30 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                         IconButton(
                           icon: Image.asset(
                             "assets/images/ai-search.png",
+                            color: primaryColor,
                             height: 25,
                           ),
-                          onPressed: () => Navigator.push(
+                          onPressed: null, // Remove navigation redundancy
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      const SearchBarScreen())),
-                        ),
-                        Expanded(
-                          child: TextField(
-                            decoration: const InputDecoration(
-                              hintText: "Ask anything",
-                              hintStyle: TextStyle(color: Color(0xFF12755F)),
-                              border: InputBorder.none,
+                                      const SearchBarScreen()),
                             ),
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const SearchBarScreen())),
+                            child: Text(
+                              "Ask anything",
+                              style: TextStyle(
+                                color: primaryColor,
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
                         ),
                         Container(
-                          padding: EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             border: Border.all(color: primaryColor),
                             borderRadius: BorderRadius.circular(10),
@@ -394,15 +395,16 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                             text: TextSpan(
                               text: 'Islamic ',
                               style: TextStyle(
-                                  color: primaryColor,
-                                  fontFamily: 'NotoSans',
-                                  fontWeight: FontWeight.w600),
+                                color: primaryColor,
+                                fontFamily: 'NotoSans',
+                                fontWeight: FontWeight.w600,
+                              ),
                               children: <TextSpan>[
                                 TextSpan(
                                   text: 'AI',
                                   style: TextStyle(
-                                      color: primaryColor,
-                                      fontWeight: FontWeight.bold),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
@@ -411,13 +413,10 @@ class _HomeScreenState extends State<HomeScreen> with AdStateMixin<HomeScreen> {
                         IconButton(
                           icon: Image.asset(
                             "assets/images/mic.png",
+                            color: primaryColor,
                             height: 25,
                           ),
-                          onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const SearchBarScreen())),
+                          onPressed: null, // Remove navigation redundancy
                         ),
                       ],
                     ),

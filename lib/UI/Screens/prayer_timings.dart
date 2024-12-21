@@ -1,3 +1,9 @@
+
+//  CREATED THIS FILE TO MAKE WIDGET FOR THE HOME SCREEN
+
+
+
+
 // import 'package:flutter/material.dart';
 // import 'package:intl/intl.dart'; 
 // import '../../Services/prayer_times_services.dart';
@@ -64,4 +70,4 @@
 //   }
 // }
 
-// //  CREATED THIS FILE TO MAKE WIDGET FOR THE HOME SCREEN
+// 
